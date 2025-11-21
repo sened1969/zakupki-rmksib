@@ -1,0 +1,46 @@
+﻿.env
+__pycache__/ 
+*.pyc
+*.pyo
+*.pyd
+.Python
+.env.*
+.venv/
+venv/
+build/
+dist/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.DS_Store
+.idea/
+.vscode/
+
+# База данных
+*.db
+*.sqlite
+*.sqlite3
+procurement.db
+
+# Логи
+*.log
+*.bak
+
+# Временные файлы
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+Thumbs.db
+
+# Файлы с секретами (если есть)
+SECURITY_ENCRYPTION_KEY.md
+*.key
+*.pem
+*.cert
+
+# Архивы
+*.zip
+*.tar.gz
+*.rar
