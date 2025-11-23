@@ -139,7 +139,7 @@ https://github.com/ваш-username/zakupki-rmksib.git
 
 ```bash
 # Проверка статуса
-git status
+
 
 # Проверка текущей ветки
 git branch

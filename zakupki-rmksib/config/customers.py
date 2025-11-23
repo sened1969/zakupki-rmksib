@@ -76,3 +76,7 @@ def is_customer_active(customer_name: str) -> bool:
 
 
 
+
+
+
+

@@ -29,8 +29,17 @@ def _analysis_keyboard(lot_number: str, has_documentation: bool = False) -> Inli
 	return InlineKeyboardMarkup(inline_keyboard=keyboard)
 
 
-def _lot_detail_keyboard(lot_number: str, has_documentation: bool = False, has_url: bool = False) -> InlineKeyboardMarkup:
-	"""Клавиатура для детального просмотра лота"""
+def _lot_detail_keyboard(lot_number: str, has_documentation: bool = False, has_url: bool = False, back_source: str = "filtered", review_status: str | None = None) -> InlineKeyboardMarkup:
+	"""
+	Клавиатура для детального просмотра лота
+	
+	Args:
+		lot_number: Номер лота
+		has_documentation: Есть ли документация
+		has_url: Есть ли URL
+		back_source: Источник возврата - "filtered" для "Мои лоты", "all" для "Показать все лоты"
+		review_status: Статус просмотра лота - если "in_work", добавляется кнопка "Поиск Поставщиков"
+	"""
 	from bot.keyboards.inline import get_main_menu_button
 	keyboard = []
 	if has_url:
@@ -40,7 +49,13 @@ def _lot_detail_keyboard(lot_number: str, has_documentation: bool = False, has_u
 	keyboard.append([InlineKeyboardButton(text="📎 Загрузить документацию", callback_data=f"upload_doc:{lot_number}")])
 	# Одна кнопка анализа - умная логика внутри обработчика
 	keyboard.append([InlineKeyboardButton(text="🧠 Анализ лота", callback_data=f"analyze_lot:{lot_number}")])
-	keyboard.append([InlineKeyboardButton(text="🔙 Назад к списку", callback_data="lots:back")])
+	
+	# Если статус "in_work", добавляем кнопку "Поиск Поставщиков"
+	if review_status == "in_work":
+		keyboard.append([InlineKeyboardButton(text="🔍 Поиск Поставщиков", callback_data=f"lots:search_supplier:{lot_number}")])
+	
+	# Кнопка "Назад" с указанием источника
+	keyboard.append([InlineKeyboardButton(text="🔙 Назад к списку", callback_data=f"lots:back:{back_source}")])
 	keyboard.append(get_main_menu_button())
 	return InlineKeyboardMarkup(inline_keyboard=keyboard)
 
@@ -202,7 +217,12 @@ async def show_my_lots(message: Message, db_user: User) -> None:
 		text += f"   📊 {review_status_emoji}\n"
 		text += f"   🆔 <code>{lot.lot_number}</code>\n\n"
 	
-	keyboard = get_lots_pagination_keyboard(filtered_lots, current_page=current_page, page_size=page_size)
+	keyboard = get_lots_pagination_keyboard(
+		filtered_lots, 
+		current_page=current_page, 
+		page_size=page_size,
+		back_source="filtered"  # Указываем, что это раздел "Мои лоты"
+	)
 	
 	await message.answer(text, parse_mode="HTML", reply_markup=keyboard)
 
@@ -254,7 +274,8 @@ async def handle_lot_by_number(message: Message, db_user: User) -> None:
 		reply_markup=_lot_detail_keyboard(
 			lot.lot_number, 
 			has_documentation=bool(lot.documentation_path),
-			has_url=bool(lot.url)
+			has_url=bool(lot.url),
+			review_status=lot.review_status
 		)
 	)
 
@@ -404,7 +425,8 @@ async def download_documentation_cb(query, db_user: User):
 				reply_markup=_lot_detail_keyboard(
 					lot_number,
 					has_documentation=bool(lot.documentation_path),
-					has_url=bool(lot.url)
+					has_url=bool(lot.url),
+					review_status=lot.review_status
 				)
 			)
 			return
@@ -424,7 +446,8 @@ async def download_documentation_cb(query, db_user: User):
 				reply_markup=_lot_detail_keyboard(
 					lot_number,
 					has_documentation=bool(lot.documentation_path),
-					has_url=bool(lot.url)
+					has_url=bool(lot.url),
+					review_status=lot.review_status
 				)
 			)
 			return
@@ -459,7 +482,8 @@ async def download_documentation_cb(query, db_user: User):
 			reply_markup=_lot_detail_keyboard(
 				lot_number,
 				has_documentation=True,  # Теперь документация есть
-				has_url=bool(lot.url)
+				has_url=bool(lot.url),
+				review_status=lot.review_status if lot else None
 			)
 		)
 		
@@ -472,7 +496,8 @@ async def download_documentation_cb(query, db_user: User):
 			reply_markup=_lot_detail_keyboard(
 				lot_number,
 				has_documentation=bool(lot.documentation_path) if lot else False,
-				has_url=bool(lot.url) if lot else False
+				has_url=bool(lot.url) if lot else False,
+				review_status=lot.review_status if lot else None
 			)
 		)
 
@@ -603,7 +628,12 @@ async def handle_documentation_upload(message: Message, db_user: User, state: FS
 			lot = await lot_repo.get_by_lot_number(lot_number)
 			has_url = bool(lot.url) if lot else False
 		
-		keyboard = _lot_detail_keyboard(lot_number, has_documentation=True, has_url=has_url)
+		keyboard = _lot_detail_keyboard(
+			lot_number, 
+			has_documentation=True, 
+			has_url=has_url,
+			review_status=lot.review_status if lot else None
+		)
 		await message.answer(text, parse_mode="HTML", reply_markup=keyboard)
 		
 	except Exception as e:
@@ -866,10 +896,11 @@ async def show_all_lots_cb(query, db_user: User):
 		current_page=current_page, 
 		page_size=page_size,
 		page_callback_prefix="lots:all_page:",  # Используем отдельный префикс для пагинации всех лотов
-		show_add_doc_button=False  # Не показываем кнопку "Добавить документацию" в разделе "Показать все лоты"
+		show_add_doc_button=False,  # Не показываем кнопку "Добавить документацию" в разделе "Показать все лоты"
+		back_source="all"  # Указываем, что это раздел "Показать все лоты"
 	)
 	# Добавляем кнопку "Назад"
-	keyboard.inline_keyboard.append([InlineKeyboardButton(text="🔙 Назад к фильтрованным лотам", callback_data="lots:back")])
+	keyboard.inline_keyboard.append([InlineKeyboardButton(text="🔙 Назад к фильтрованным лотам", callback_data="lots:back:filtered")])
 	
 	try:
 		await query.message.edit_text(text, parse_mode="HTML", reply_markup=keyboard)
@@ -933,10 +964,11 @@ async def handle_all_lots_pagination(query, db_user: User):
 		current_page=page_num, 
 		page_size=page_size,
 		page_callback_prefix="lots:all_page:",  # Используем отдельный префикс для пагинации всех лотов
-		show_add_doc_button=False  # Не показываем кнопку "Добавить документацию" в разделе "Показать все лоты"
+		show_add_doc_button=False,  # Не показываем кнопку "Добавить документацию" в разделе "Показать все лоты"
+		back_source="all"  # Указываем, что это раздел "Показать все лоты"
 	)
 	# Добавляем кнопку "Назад"
-	keyboard.inline_keyboard.append([InlineKeyboardButton(text="🔙 Назад к фильтрованным лотам", callback_data="lots:back")])
+	keyboard.inline_keyboard.append([InlineKeyboardButton(text="🔙 Назад к фильтрованным лотам", callback_data="lots:back:filtered")])
 	
 	await query.answer()
 	try:
@@ -1004,7 +1036,12 @@ async def handle_lots_pagination(query, db_user: User):
 		text += f"   📊 {review_status_emoji}\n"
 		text += f"   🆔 <code>{lot.lot_number}</code>\n\n"
 	
-	keyboard = get_lots_pagination_keyboard(filtered_lots, current_page=page_num, page_size=page_size)
+	keyboard = get_lots_pagination_keyboard(
+		filtered_lots, 
+		current_page=page_num, 
+		page_size=page_size,
+		back_source="filtered"  # Указываем, что это раздел "Мои лоты"
+	)
 	
 	await query.answer()
 	try:
@@ -1016,7 +1053,16 @@ async def handle_lots_pagination(query, db_user: User):
 @router.callback_query(F.data.startswith("lots:view:"))
 async def view_lot_cb(query, db_user: User):
 	"""Показать детали конкретного лота"""
-	lot_number = query.data.split(":", 2)[2]
+	# Парсим callback_data: lots:view:all:PVK-20241029-001 или lots:view:filtered:PVK-20241029-001
+	parts = query.data.split(":", 3)
+	if len(parts) == 4:
+		# Новый формат с указанием источника
+		back_source = parts[2]  # "all" или "filtered"
+		lot_number = parts[3]
+	else:
+		# Старый формат для обратной совместимости
+		lot_number = parts[2] if len(parts) >= 3 else parts[-1]
+		back_source = "filtered"  # По умолчанию возвращаемся к фильтрованным лотам
 	
 	async with async_session_maker() as session:
 		lot_repo = LotRepository(session)
@@ -1085,7 +1131,9 @@ async def view_lot_cb(query, db_user: User):
 	keyboard = _lot_detail_keyboard(
 		lot.lot_number,
 		has_documentation=bool(lot.documentation_path),
-		has_url=bool(lot.url)
+		has_url=bool(lot.url),
+		back_source=back_source,
+		review_status=lot.review_status
 	)
 	
 	try:
@@ -1094,11 +1142,136 @@ async def view_lot_cb(query, db_user: User):
 		await query.message.answer(text, parse_mode="HTML", reply_markup=keyboard)
 
 
-@router.callback_query(F.data == "lots:back")
+@router.callback_query(F.data.startswith("lots:back"))
 async def back_to_lots_list(query, db_user: User):
 	"""Возврат к списку лотов"""
-	await show_my_lots(query.message, db_user)
+	# Парсим callback_data: lots:back:all или lots:back:filtered
+	parts = query.data.split(":")
+	if len(parts) >= 3:
+		back_source = parts[2]  # "all" или "filtered"
+	else:
+		back_source = "filtered"  # По умолчанию возвращаемся к фильтрованным лотам
+	
 	await query.answer()
+	
+	if back_source == "all":
+		# Возвращаемся к разделу "Показать все лоты"
+		await show_all_lots_cb(query, db_user)
+	else:
+		# Возвращаемся к разделу "Мои лоты"
+		# Используем редактирование сообщения для callback query
+		try:
+			# Получаем данные для отображения
+			async with async_session_maker() as session:
+				lot_repo = LotRepository(session)
+				pref_repo = UserPreferenceRepository(session)
+				
+				pref = await pref_repo.get_or_create(db_user.id)
+				all_lots = await lot_repo.get_all(limit=100, inverted=True)
+				
+				filtered_lots = []
+				for lot in all_lots:
+					if _lot_matches_preferences(
+						lot,
+						pref.customers,
+						pref.nomenclature,
+						pref.budget_min,
+						pref.budget_max
+					):
+						filtered_lots.append(lot)
+			
+			if not filtered_lots:
+				# Если нет фильтрованных лотов, показываем сообщение
+				if not all_lots:
+					keyboard = InlineKeyboardMarkup(inline_keyboard=[
+						[InlineKeyboardButton(text="🔄 Запросить закупки", callback_data="pref:fetch_lots")],
+						[InlineKeyboardButton(text="⚙️ Настройки", callback_data="pref:menu")]
+					])
+					await query.message.edit_text(
+						"📭 <b>У вас пока нет лотов</b>\n\n"
+						"Лоты будут автоматически добавляться после настройки парсера.\n\n"
+						"Вы можете запросить актуальные закупки вручную:",
+						parse_mode="HTML",
+						reply_markup=keyboard
+					)
+				else:
+					filters_info = []
+					if pref.customers:
+						filters_info.append(f"заказчики: {', '.join(pref.customers[:2])}{'...' if len(pref.customers) > 2 else ''}")
+					if pref.nomenclature:
+						filters_info.append(f"номенклатура: {len(pref.nomenclature)} групп")
+					if pref.budget_min or pref.budget_max:
+						budget_str = ""
+						if pref.budget_min:
+							budget_str += f"от {pref.budget_min:,} ₽"
+						if pref.budget_max:
+							if budget_str:
+								budget_str += " "
+							budget_str += f"до {pref.budget_max:,} ₽"
+						filters_info.append(f"бюджет: {budget_str}")
+					
+					filters_text = "\n".join(f"  • {f}" for f in filters_info) if filters_info else "  • фильтры не установлены"
+					
+					keyboard = InlineKeyboardMarkup(inline_keyboard=[
+						[InlineKeyboardButton(text="👁 Показать все лоты", callback_data="lots:show_all")],
+						[InlineKeyboardButton(text="🔄 Запросить закупки", callback_data="pref:fetch_lots")],
+						[InlineKeyboardButton(text="⚙️ Изменить настройки", callback_data="pref:menu")]
+					])
+					
+					await query.message.edit_text(
+						f"📭 <b>Нет лотов, соответствующих вашим настройкам</b>\n\n"
+						f"Всего лотов в системе: {len(all_lots)}\n\n"
+						f"<b>Ваши фильтры:</b>\n{filters_text}\n\n"
+						f"Вы можете просмотреть все лоты или изменить настройки:",
+						parse_mode="HTML",
+						reply_markup=keyboard
+					)
+				return
+			
+			# Формируем текст для первой страницы
+			from bot.keyboards.inline import get_lots_pagination_keyboard
+			page_size = 10
+			current_page = 1
+			
+			total_lots = len(filtered_lots)
+			start_idx = 0
+			end_idx = min(page_size, total_lots)
+			page_lots = filtered_lots[start_idx:end_idx]
+			
+			separator = format_separator(30)
+			text = f"{separator}\n"
+			text += f"📋 <b>Ваши лоты</b>\n"
+			text += f"{separator}\n\n"
+			text += f"Всего: <code>{total_lots}</code> из <code>{len(all_lots)}</code>\n"
+			if total_lots > page_size:
+				text += f"Страница: <code>{current_page}</code> из <code>{(total_lots + page_size - 1) // page_size}</code>\n"
+			text += "\n"
+			
+			# Показываем лоты текущей страницы
+			for idx, lot in enumerate(page_lots, start=start_idx + 1):
+				status_emoji = {"active": "🟢", "closed": "🔴", "pending": "🟡"}.get(lot.status, "⚪")
+				review_status_emoji = {
+					"not_viewed": "👁 Не просмотрен",
+					"in_work": "✅ В работе",
+					"rejected": "❌ Отказ"
+				}.get(lot.review_status or "not_viewed", "👁 Не просмотрен")
+				text += f"<b>{idx}.</b> {status_emoji} <b>{lot.title[:40]}...</b>\n"
+				text += f"   💰 {format_rub(float(lot.budget))} | 📅 {format_date(lot.deadline)}\n"
+				text += f"   📊 {review_status_emoji}\n"
+				text += f"   🆔 <code>{lot.lot_number}</code>\n\n"
+			
+			keyboard = get_lots_pagination_keyboard(
+				filtered_lots, 
+				current_page=current_page, 
+				page_size=page_size,
+				back_source="filtered"
+			)
+			
+			await query.message.edit_text(text, parse_mode="HTML", reply_markup=keyboard)
+		except Exception as e:
+			# Если не удалось отредактировать, отправляем новое сообщение
+			logger.error(f"Error editing message in back_to_lots_list: {e}")
+			await show_my_lots(query.message, db_user)
 
 
 @router.message(F.text == "/cancel", StateFilter(DocumentationStates.waiting_document))
@@ -1280,7 +1453,12 @@ async def confirm_lot_creation(message: Message, db_user: User, state: FSMContex
 			f"🆔 Номер лота: {lot_number}\n\n"
 			f"Теперь вы можете загрузить конкурсную документацию для этого лота.",
 			parse_mode="HTML",
-			reply_markup=_lot_detail_keyboard(lot_number, has_documentation=False, has_url=False)
+			reply_markup=_lot_detail_keyboard(
+				lot_number, 
+				has_documentation=False, 
+				has_url=False,
+				review_status=None  # Новый лот, статус еще не установлен
+			)
 		)
 		
 	except Exception as e:
@@ -1745,12 +1923,26 @@ async def set_lot_in_work(query, db_user: User):
 		lot.review_status = "in_work"
 		await lot_repo.update(lot)
 	
+	# Показываем меню с кнопками "Поиск Поставщиков" и "Главное меню"
+	from bot.keyboards.inline import get_main_menu_button
+	keyboard = InlineKeyboardMarkup(inline_keyboard=[
+		[InlineKeyboardButton(text="🔍 Поиск Поставщиков", callback_data=f"lots:search_supplier:{lot_number}")],
+		get_main_menu_button()
+	])
+	
 	# Пробуем отредактировать сообщение, если не получится - отправляем новое
 	try:
-		await query.message.edit_text(f"✅ Лот {lot_number} взят в работу")
+		await query.message.edit_text(
+			f"✅ <b>Лот {lot_number} взят в работу</b>\n\n"
+			f"Выберите дальнейшее действие:",
+			parse_mode="HTML",
+			reply_markup=keyboard
+		)
 	except Exception:
-		await query.message.answer(f"✅ Лот {lot_number} взят в работу")
-	
-	# Возвращаемся к списку лотов
-	await show_my_lots(query.message, db_user)
+		await query.message.answer(
+			f"✅ <b>Лот {lot_number} взят в работу</b>\n\n"
+			f"Выберите дальнейшее действие:",
+			parse_mode="HTML",
+			reply_markup=keyboard
+		)
 

@@ -300,12 +300,13 @@ async def run_parser_for_customer(customer_name: str) -> tuple[int, str]:
 	return new_count, message
 
 
-async def cleanup_expired_lots(days_before_expiry: int = 1) -> int:
+async def cleanup_expired_lots(days_before_expiry: int = 0) -> int:
 	"""
-	Очистка лотов с истекающим дедлайном
+	Очистка лотов с прошедшим дедлайном
 	
 	Args:
-		days_before_expiry: Количество дней до истечения дедлайна (по умолчанию 1)
+		days_before_expiry: Количество дней до истечения дедлайна (по умолчанию 0 - только уже прошедшие)
+	                      Если > 0, то удаляются лоты, у которых дедлайн истекает в течение этого количества дней
 	
 	Returns:
 		Количество удаленных лотов
@@ -318,7 +319,10 @@ async def cleanup_expired_lots(days_before_expiry: int = 1) -> int:
 			deleted_count = await repo.delete_expired_lots(days_before_expiry)
 		
 		if deleted_count > 0:
-			logger.info(f"Cleanup: deleted {deleted_count} expired lots (deadline <= {days_before_expiry} day(s) from now)")
+			if days_before_expiry == 0:
+				logger.info(f"Cleanup: deleted {deleted_count} expired lots (deadline < now)")
+			else:
+				logger.info(f"Cleanup: deleted {deleted_count} expired lots (deadline < now - {days_before_expiry} day(s))")
 		else:
 			logger.info("Cleanup: no expired lots to delete")
 		

@@ -178,7 +178,8 @@ def get_lots_pagination_keyboard(
     page_size: int = 10,
     callback_prefix: str = "lots:view:",
     page_callback_prefix: str = "lots:page:",
-    show_add_doc_button: bool = True
+    show_add_doc_button: bool = True,
+    back_source: str = "filtered"  # "filtered" для "Мои лоты", "all" для "Показать все лоты"
 ) -> InlineKeyboardMarkup:
     """Создает клавиатуру с пагинацией для списка лотов"""
     from bot.keyboards.inline import get_main_menu_button
@@ -197,10 +198,24 @@ def get_lots_pagination_keyboard(
     keyboard = []
     
     # Кнопки лотов для текущей страницы
-    for lot in page_lots:
+    for idx, lot in enumerate(page_lots):
+        # Вычисляем порядковый номер в реестре (с учетом пагинации)
+        lot_number_in_list = start_idx + idx + 1
+        
+        # Определяем индикатор статуса просмотра
+        review_status = getattr(lot, 'review_status', None) or "not_viewed"
+        if review_status == "in_work":
+            status_icon = "✅"  # Лот просмотрен и взят в работу
+        elif review_status == "rejected":
+            status_icon = "❌"  # Лот отклонён, но дедлайн ещё не закончен
+        else:  # "not_viewed" или None
+            status_icon = "❓"  # Лот ещё не просмотрен
+        
+        # Передаем информацию о разделе через callback_data
+        callback_data = f"{callback_prefix}{back_source}:{lot.lot_number}"
         keyboard.append([InlineKeyboardButton(
-            text=f"📋 {lot.lot_number}",
-            callback_data=f"{callback_prefix}{lot.lot_number}"
+            text=f"{lot_number_in_list}. {status_icon} 📋 {lot.lot_number}",
+            callback_data=callback_data
         )])
     
     # Кнопки навигации по страницам

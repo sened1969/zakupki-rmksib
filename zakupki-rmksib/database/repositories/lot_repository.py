@@ -28,9 +28,21 @@ class LotRepository:
         result = await self.session.execute(select(Lot).where(Lot.lot_number == lot_number))
         return result.scalar_one_or_none()
 
-    async def get_all(self, limit: int = 100, inverted: bool = False) -> List[Lot]:
-        """Получить все лоты"""
+    async def get_all(self, limit: int = 100, inverted: bool = False, exclude_expired: bool = True) -> List[Lot]:
+        """
+        Получить все лоты
+        
+        Args:
+            limit: Максимальное количество лотов
+            inverted: Сортировать по убыванию ID (новые первыми)
+            exclude_expired: Исключить лоты с прошедшим дедлайном (по умолчанию True)
+        """
         query = select(Lot)
+        
+        # Фильтруем лоты с прошедшим дедлайном
+        if exclude_expired:
+            query = query.where(Lot.deadline >= datetime.utcnow())
+        
         if inverted:
             query = query.order_by(Lot.id.desc())
         query = query.limit(limit)
@@ -49,30 +61,34 @@ class LotRepository:
         await self.session.delete(lot)
         await self.session.commit()
     
-    async def get_expired_lots(self, days_before_expiry: int = 1) -> List[Lot]:
+    async def get_expired_lots(self, days_before_expiry: int = 0) -> List[Lot]:
         """
-        Получить лоты, у которых дедлайн истекает через указанное количество дней или уже истек
+        Получить лоты с прошедшим дедлайном
         
         Args:
-            days_before_expiry: Количество дней до истечения дедлайна (по умолчанию 1)
+            days_before_expiry: По умолчанию 0 - возвращает только лоты с уже прошедшим дедлайном (deadline < now).
+                              Если > 0, то возвращает лоты, у которых дедлайн прошел более X дней назад.
+                              Например, days_before_expiry=1 вернет лоты с дедлайном < (сегодня - 1 день).
         
         Returns:
-            Список лотов с истекающим дедлайном
+            Список лотов с прошедшим дедлайном
         """
-        # Вычисляем дату истечения (сегодня + days_before_expiry дней)
-        expiry_date = datetime.utcnow() + timedelta(days=days_before_expiry)
+        # Вычисляем дату истечения (сегодня - days_before_expiry дней)
+        # Если days_before_expiry = 0, то expiry_date = сейчас, ищем лоты с deadline < сейчас (уже прошедшие)
+        expiry_date = datetime.utcnow() - timedelta(days=days_before_expiry)
         
-        # Ищем лоты, у которых deadline <= expiry_date
-        query = select(Lot).where(Lot.deadline <= expiry_date)
+        # Ищем лоты, у которых deadline < expiry_date (уже прошедшие)
+        query = select(Lot).where(Lot.deadline < expiry_date)
         result = await self.session.execute(query)
         return list(result.scalars().all())
     
-    async def delete_expired_lots(self, days_before_expiry: int = 1) -> int:
+    async def delete_expired_lots(self, days_before_expiry: int = 0) -> int:
         """
-        Удалить лоты с истекающим дедлайном
+        Удалить лоты с прошедшим дедлайном
         
         Args:
-            days_before_expiry: Количество дней до истечения дедлайна (по умолчанию 1)
+            days_before_expiry: По умолчанию 0 - удаляет только лоты с уже прошедшим дедлайном (deadline < now).
+                              Если > 0, то удаляет лоты, у которых дедлайн прошел более X дней назад.
         
         Returns:
             Количество удаленных лотов

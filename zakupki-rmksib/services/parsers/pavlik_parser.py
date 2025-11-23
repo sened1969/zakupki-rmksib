@@ -183,3 +183,7 @@ async def fetch_new_lots() -> List[Dict]:
 
 
 
+
+
+
+
