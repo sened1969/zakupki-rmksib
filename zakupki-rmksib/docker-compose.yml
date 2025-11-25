@@ -1,5 +1,4 @@
-﻿version: "3.9"
-services:
+﻿services:
   postgres:
     image: postgres:16
     environment:
@@ -33,6 +32,22 @@ services:
       redis:
         condition: service_started
     command: bash -lc "pip install --no-cache-dir -r requirements.txt && alembic upgrade head && python -m bot.main"
+
+  admin_panel:
+    image: python:3.11-slim
+    working_dir: /app
+    volumes:
+      - ./:/app
+    env_file: .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: bash -lc "cd admin_panel && pip install --no-cache-dir -r ../requirements.txt && python manage.py migrate --run-syncdb && python manage.py collectstatic --noinput && python manage.py runserver 0.0.0.0:8000"
+    environment:
+      - DJANGO_DEBUG=True
+      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
 
 volumes:
   pgdata:
