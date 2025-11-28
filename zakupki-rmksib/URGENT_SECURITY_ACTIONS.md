@@ -3,8 +3,8 @@
 ## ⚠️ КРИТИЧЕСКАЯ ПРОБЛЕМА
 
 В документации проекта были обнаружены и удалены реальные API ключи:
-- **Telegram Bot Token**: `8315027718:AAF-l4Q592r5ay1NeNYAMtdMzX5NOyJRKDo`
-- **Perplexity API Key**: `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`
+- **Telegram Bot Token**: `[ОТОЗВАН]`
+- **Perplexity API Key**: `[ОТОЗВАН]`
 
 Эти ключи были закоммичены в публичный репозиторий GitHub и **ДОЛЖНЫ БЫТЬ НЕМЕДЛЕННО ОТОЗВАНЫ**.
 
@@ -33,7 +33,7 @@
 
 **Старые токены (ОТОЗВАНЫ):**
 ```
-8315027718:AAF-l4Q592r5ay1NeNYAMtdMzX5NOyJRKDo (старый)
+[Все старые токены отозваны через @BotFather]
 ```
 
 **Новый токен:** Создан и сохранен в `.env` файле (НЕ коммитится в Git)
@@ -50,7 +50,7 @@
 
 **Старые ключи (ОТОЗВАНЫ):**
 ```
-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 (старый)
+[Все старые ключи отозваны через Perplexity Dashboard]
 ```
 
 **Новый ключ:** Создан и сохранен в `.env` файле (НЕ коммитится в Git)
