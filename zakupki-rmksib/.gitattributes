@@ -1,0 +1,8 @@
+# Автоматическая нормализация окончаний строк
+* text=auto
+
+# Защита файлов с секретами
+*.env text eol=lf
+*.key text eol=lf
+*.secret text eol=lf
+
