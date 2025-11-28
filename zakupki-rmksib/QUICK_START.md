@@ -23,14 +23,14 @@ cp .env.example .env
 **Или создайте вручную** файл `.env` с содержимым:
 
 ```env
-BOT_TOKEN=8315027718:AAF-l4Q592r5ay1NeNYAMtdMzX5NOyJRKDo
+BOT_TOKEN=your_bot_token_here
 REDIS_URL=redis://localhost:6379/0
 POSTGRES_HOST=localhost
 POSTGRES_PORT=5432
 POSTGRES_DB=procurement
 POSTGRES_USER=procure_user
 POSTGRES_PASSWORD=change_me
-PERPLEXITY_API_KEY=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
+PERPLEXITY_API_KEY=your_perplexity_api_key_here
 NOTIFY_EMAILS=["sp@rmksib.ru", "bo@rmksib.ru", "info@rmksib.ru", "sened17@yandex.ru"]
 ```
 

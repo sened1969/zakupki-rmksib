@@ -19,7 +19,7 @@ POSTGRES_PORT=5432
 POSTGRES_DB=procurement
 POSTGRES_USER=procure_user
 POSTGRES_PASSWORD=change_me
-PERPLEXITY_API_KEY=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
+PERPLEXITY_API_KEY=your_perplexity_api_key_here
 ```
 
 #### Шаг 3: Установите зависимости

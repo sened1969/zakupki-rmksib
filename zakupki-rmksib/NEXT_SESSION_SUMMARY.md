@@ -156,7 +156,7 @@
 **Обязательные переменные в .env**:
 ```
 BOT_TOKEN - токен бота
-PERPLEXITY_API_KEY - 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
+PERPLEXITY_API_KEY - your_perplexity_api_key_here
 SMTP_HOST, SMTP_USER, SMTP_PASS, COMPANY_EMAIL
 ```
 

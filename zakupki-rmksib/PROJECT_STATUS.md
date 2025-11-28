@@ -312,7 +312,7 @@ zakupki-rmksib/
 
 #### Perplexity интеграция:
 - **Модель**: llama-3.1-sonar-large-128k-online
-- **API ключ**: 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
+- **API ключ**: ваш_perplexity_api_ключ (установите в .env)
 - **Промпт**: структурированный анализ с учетом бюджета и накладных расходов
 - **Формат ответа**: краткий анализ с рекомендациями
 
@@ -327,7 +327,7 @@ POSTGRES_PORT=5432
 POSTGRES_DB=procurement
 POSTGRES_USER=procure_user
 POSTGRES_PASSWORD=change_me
-PERPLEXITY_API_KEY=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
+PERPLEXITY_API_KEY=your_perplexity_api_key_here
 SMTP_HOST=smtp.example.com
 SMTP_USER=user@example.com
 SMTP_PASS=password
