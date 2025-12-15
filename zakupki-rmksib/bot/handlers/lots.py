@@ -60,7 +60,7 @@ def _lot_detail_keyboard(lot_number: str, has_documentation: bool = False, has_u
 	return InlineKeyboardMarkup(inline_keyboard=keyboard)
 
 
-def _lot_matches_preferences(
+async def _lot_matches_preferences(
 	lot: Lot,
 	customers: list | None,
 	nomenclature: list | None,
@@ -86,8 +86,14 @@ def _lot_matches_preferences(
 	
 	# Проверка номенклатуры
 	if nomenclature and len(nomenclature) > 0:  # Проверяем, что список не пустой
-		from config.nomenclature import check_nomenclature_match
-		nom_ok = check_nomenclature_match(lot.title, nomenclature)
+		from config.nomenclature import check_nomenclature_match_enhanced
+		nom_ok = await check_nomenclature_match_enhanced(
+			lot_title=lot.title,
+			lot_nomenclature=lot.nomenclature,
+			lot_description=lot.description,
+			nomenclature_list=nomenclature,
+			use_llm=True  # Используем LLM для семантического сопоставления
+		)
 		logger.debug(f"Lot {lot.lot_number}: nomenclature check - title={lot.title[:50]}, nom_ok={nom_ok}")
 	
 	# Проверка бюджета
@@ -121,7 +127,7 @@ async def show_my_lots(message: Message, db_user: User) -> None:
 		filtered_lots = []
 		logger.info(f"Filtering lots for user {db_user.id}: customers={pref.customers}, nomenclature={pref.nomenclature}, budget_min={pref.budget_min}, budget_max={pref.budget_max}")
 		for lot in all_lots:
-			if _lot_matches_preferences(
+			if await _lot_matches_preferences(
 				lot,
 				pref.customers,
 				pref.nomenclature,
@@ -311,7 +317,7 @@ async def analyze_lot_cmd(message: Message, db_user: User) -> None:
 		if not result:
 			await message.answer("Не удалось получить анализ от модели.")
 			return
-		await message.answer("🧠 Анализ Perplexity:\n\n" + result)
+		await message.answer("🧠 Быстрый анализ Perplexity:\n\n" + result)
 	except Exception as e:
 		from utils.error_handling import handle_error
 		await handle_error(message, e, error_type="api", context="analyze_lot_cmd")
@@ -371,9 +377,9 @@ async def _mail_analysis(lot_number: str, origin_message: Message) -> None:
 		if not recipients:
 			await origin_message.answer("Получатели не настроены.")
 			return
-		subject = f"Анализ лота {lot.lot_number}: {lot.title[:60]}"
+		subject = f"Быстрый анализ лота {lot.lot_number}: {lot.title[:60]}"
 		body = (
-			f"<h3>Анализ лота {lot.lot_number}</h3>"
+			f"<h3>Быстрый анализ лота {lot.lot_number}</h3>"
 			f"<p><b>Заказчик:</b> {lot.customer or '-'}<br>"
 			f"<b>Номенклатура:</b> {', '.join(lot.nomenclature or []) or '-'}<br>"
 			f"<b>Бюджет:</b> {format_rub(float(lot.budget))}<br>"
@@ -515,14 +521,20 @@ async def upload_documentation_cb(query, db_user: User, state: FSMContext):
 		await query.answer("❌ Лот не найден", show_alert=True)
 		return
 	
-	# Сохраняем номер лота в состоянии
-	await state.update_data(lot_number=lot_number)
+	# Инициализируем список загруженных файлов в состоянии
+	await state.update_data(
+		lot_number=lot_number,
+		uploaded_files=[],  # Список словарей: [{"path": "...", "text": "...", "filename": "..."}, ...]
+		uploaded_texts=[]   # Список извлеченных текстов для объединения
+	)
 	await state.set_state(DocumentationStates.waiting_document)
 	
 	await query.message.edit_text(
 		f"📎 <b>Загрузка документации для лота {lot_number}</b>\n\n"
 		f"Отправьте файл с конкурсной документацией.\n\n"
-		f"Поддерживаемые форматы: PDF, DOCX, DOC, TXT, RTF\n\n"
+		f"<b>Поддерживаемые форматы:</b> PDF, DOCX, DOC, TXT, RTF, XLSX, XLS\n\n"
+		f"Вы можете загрузить несколько файлов подряд.\n"
+		f"После загрузки каждого файла вам будет предложено продолжить или завершить.\n\n"
 		f"<i>Для отмены отправьте /cancel</i>",
 		parse_mode="HTML"
 	)
@@ -531,9 +543,11 @@ async def upload_documentation_cb(query, db_user: User, state: FSMContext):
 
 @router.message(F.document, StateFilter(DocumentationStates.waiting_document))
 async def handle_documentation_upload(message: Message, db_user: User, state: FSMContext):
-	"""Обработчик загруженного файла документации"""
+	"""Обработчик загруженного файла документации (поддержка множественных файлов)"""
 	data = await state.get_data()
 	lot_number = data.get("lot_number")
+	uploaded_files = data.get("uploaded_files", [])
+	uploaded_texts = data.get("uploaded_texts", [])
 	
 	if not lot_number:
 		await message.answer("❌ Ошибка: номер лота не найден. Попробуйте снова.")
@@ -546,7 +560,8 @@ async def handle_documentation_upload(message: Message, db_user: User, state: FS
 	if not is_supported_format(document.file_name):
 		await message.answer(
 			f"❌ Неподдерживаемый формат файла: {document.file_name}\n\n"
-			f"Поддерживаемые форматы: PDF, DOCX, DOC, TXT, RTF"
+			f"Поддерживаемые форматы: PDF, DOCX, DOC, TXT, RTF, XLSX, XLS\n\n"
+			f"Попробуйте отправить другой файл или завершить загрузку."
 		)
 		return
 	
@@ -555,7 +570,8 @@ async def handle_documentation_upload(message: Message, db_user: User, state: FS
 	if document.file_size and document.file_size > max_size:
 		await message.answer(
 			f"❌ Файл слишком большой: {document.file_size / 1024 / 1024:.1f} МБ\n\n"
-			f"Максимальный размер: 20 МБ"
+			f"Максимальный размер: 20 МБ\n\n"
+			f"Попробуйте отправить другой файл или завершить загрузку."
 		)
 		return
 	
@@ -563,14 +579,10 @@ async def handle_documentation_upload(message: Message, db_user: User, state: FS
 	
 	try:
 		# Скачиваем файл
-		# В aiogram 3.x правильный способ - использовать download() напрямую с объектом документа
 		logger.info(f"Downloading file: file_id={document.file_id}, filename={document.file_name}, size={document.file_size}")
 		
-		# Используем BytesIO как destination для получения байтов
 		import io
 		buffer = io.BytesIO()
-		
-		# В aiogram 3.x download() принимает объект документа напрямую
 		await message.bot.download(document, destination=buffer)
 		
 		file_bytes = buffer.getvalue()
@@ -589,51 +601,52 @@ async def handle_documentation_upload(message: Message, db_user: User, state: FS
 		documentation_text = await extract_text_from_file(file_path)
 		
 		if not documentation_text or documentation_text.startswith("[Ошибка"):
-			await message.answer(
-				f"⚠️ Не удалось извлечь текст из файла.\n\n"
-				f"{documentation_text or 'Неизвестная ошибка'}\n\n"
-				f"Файл сохранен по пути: {file_path}"
-			)
+			logger.warning(f"Could not extract text from {document.file_name}: {documentation_text}")
 			documentation_text = ""  # Сохраняем пустой текст, но файл есть
 		
-		# Сохраняем в БД
-		async with async_session_maker() as session:
-			lot_repo = LotRepository(session)
-			lot = await lot_repo.get_by_lot_number(lot_number)
-			
-			if lot:
-				lot.documentation_path = file_path
-				lot.documentation_text = documentation_text
-				lot.documentation_analyzed = False
-				await lot_repo.update(lot)
+		# Добавляем файл в список загруженных
+		file_info = {
+			"path": file_path,
+			"text": documentation_text,
+			"filename": document.file_name,
+			"size": document.file_size
+		}
+		uploaded_files.append(file_info)
+		if documentation_text:
+			uploaded_texts.append(documentation_text)
 		
-		await state.clear()
+		# Обновляем состояние
+		await state.update_data(
+			uploaded_files=uploaded_files,
+			uploaded_texts=uploaded_texts
+		)
 		
-		# Показываем результат
+		# Формируем сообщение о загруженном файле
+		files_count = len(uploaded_files)
 		text = (
-			f"✅ <b>Документация загружена успешно!</b>\n\n"
+			f"✅ <b>Файл {files_count} загружен успешно!</b>\n\n"
 			f"📎 Файл: {document.file_name}\n"
 			f"📊 Размер: {document.file_size / 1024:.1f} КБ\n"
 		)
 		
 		if documentation_text:
 			text += f"📄 Текст извлечен: {len(documentation_text)} символов\n\n"
-			text += f"Теперь вы можете проанализировать документацию."
 		else:
-			text += f"\n⚠️ Текст не извлечен. Файл сохранен, но анализ может быть недоступен."
+			text += f"⚠️ Текст не извлечен из этого файла\n\n"
 		
-		# Получаем лот для проверки URL
-		async with async_session_maker() as session:
-			lot_repo = LotRepository(session)
-			lot = await lot_repo.get_by_lot_number(lot_number)
-			has_url = bool(lot.url) if lot else False
-		
-		keyboard = _lot_detail_keyboard(
-			lot_number, 
-			has_documentation=True, 
-			has_url=has_url,
-			review_status=lot.review_status if lot else None
+		text += (
+			f"📦 Всего загружено файлов: {files_count}\n"
+			f"📄 Всего символов текста: {sum(len(t) for t in uploaded_texts)}\n\n"
+			f"Вы можете загрузить еще файлы или завершить загрузку."
 		)
+		
+		# Клавиатура с опциями продолжения
+		keyboard = InlineKeyboardMarkup(inline_keyboard=[
+			[InlineKeyboardButton(text="➕ Загрузить еще файл", callback_data=f"doc:continue_upload:{lot_number}")],
+			[InlineKeyboardButton(text="✅ Завершить загрузку", callback_data=f"doc:finish_upload:{lot_number}")],
+			[InlineKeyboardButton(text="❌ Отменить", callback_data=f"doc:cancel_upload:{lot_number}")]
+		])
+		
 		await message.answer(text, parse_mode="HTML", reply_markup=keyboard)
 		
 	except Exception as e:
@@ -653,10 +666,16 @@ async def handle_documentation_upload(message: Message, db_user: User, state: FS
 			user_message = (
 				f"❌ <b>Ошибка при загрузке файла</b>\n\n"
 				f"<code>{error_msg}</code>\n\n"
-				f"Попробуйте еще раз или обратитесь к администратору."
+				f"Попробуйте еще раз или завершите загрузку."
 			)
-		await message.answer(user_message, parse_mode="HTML")
-		await state.clear()
+		
+		# Показываем клавиатуру для продолжения даже при ошибке
+		keyboard = InlineKeyboardMarkup(inline_keyboard=[
+			[InlineKeyboardButton(text="➕ Попробовать еще раз", callback_data=f"doc:continue_upload:{lot_number}")],
+			[InlineKeyboardButton(text="✅ Завершить загрузку", callback_data=f"doc:finish_upload:{lot_number}")],
+			[InlineKeyboardButton(text="❌ Отменить", callback_data=f"doc:cancel_upload:{lot_number}")]
+		])
+		await message.answer(user_message, parse_mode="HTML", reply_markup=keyboard)
 
 
 @router.callback_query(F.data.startswith("analyze_doc:"))
@@ -675,7 +694,9 @@ async def analyze_documentation_cb(query, db_user: User):
 async def analyze_lot_cb(query, db_user: User):
 	"""
 	Универсальный обработчик анализа лота.
-	Если есть документация - анализирует по документации, иначе - по данным лота.
+	Автоматически выбирает режим:
+	- Если есть документация → ДЕТАЛЬНЫЙ анализ (analyze_documentation)
+	- Если нет документации → БЫСТРЫЙ анализ (analyze_lot)
 	"""
 	# Сразу отвечаем на callback query, чтобы избежать ошибки "query is too old"
 	try:
@@ -748,9 +769,9 @@ async def analyze_lot_cb(query, db_user: User):
 		# Если есть текст документации - анализируем по документации
 		if has_documentation_text and lot.documentation_text:
 			try:
-				await query.message.edit_text("📄 Анализирую документацию...")
+				await query.message.edit_text("📄 Выполняю детальный анализ документации...")
 			except Exception:
-				await query.message.answer("📄 Анализирую документацию...")
+				await query.message.answer("📄 Выполняю детальный анализ документации...")
 			
 			analysis = await analyze_documentation(lot, lot.documentation_text, budget_min=budget_min, budget_max=budget_max)
 			
@@ -781,16 +802,16 @@ async def analyze_lot_cb(query, db_user: User):
 			await send_long_message(
 				query.message.bot,
 				query.message.chat.id,
-				f"📄 <b>Анализ конкурсной документации для лота {lot_number}</b>\n\n{analysis}",
+				f"📄 <b>Детальный анализ лота {lot_number}</b>\n\n{analysis}",
 				parse_mode="HTML",
 				reply_markup=keyboard
 			)
 		else:
-			# Если нет документации - анализируем по данным лота
+			# Если нет документации - выполняем быстрый анализ по данным лота
 			try:
-				await query.message.edit_text("🧠 Анализирую данные лота...")
+				await query.message.edit_text("🧠 Выполняю быстрый анализ лота...")
 			except Exception:
-				await query.message.answer("🧠 Анализирую данные лота...")
+				await query.message.answer("🧠 Выполняю быстрый анализ лота...")
 			
 			result = await analyze_lot(lot, budget_min=budget_min, budget_max=budget_max)
 			if not result:
@@ -810,7 +831,7 @@ async def analyze_lot_cb(query, db_user: User):
 			await send_long_message(
 				query.message.bot,
 				query.message.chat.id,
-				f"🧠 <b>Анализ лота {lot_number}</b>\n\n{result}",
+				f"🧠 <b>Быстрый анализ лота {lot_number}</b>\n\n{result}",
 				parse_mode="HTML",
 				reply_markup=keyboard
 			)
@@ -995,7 +1016,7 @@ async def handle_lots_pagination(query, db_user: User):
 		# Фильтруем по настройкам пользователя
 		filtered_lots = []
 		for lot in all_lots:
-			if _lot_matches_preferences(
+			if await _lot_matches_preferences(
 				lot,
 				pref.customers,
 				pref.nomenclature,
@@ -1171,7 +1192,7 @@ async def back_to_lots_list(query, db_user: User):
 				
 				filtered_lots = []
 				for lot in all_lots:
-					if _lot_matches_preferences(
+					if await _lot_matches_preferences(
 						lot,
 						pref.customers,
 						pref.nomenclature,
@@ -1274,11 +1295,190 @@ async def back_to_lots_list(query, db_user: User):
 			await show_my_lots(query.message, db_user)
 
 
+@router.callback_query(F.data.startswith("doc:continue_upload:"))
+async def continue_upload_doc_cb(query, db_user: User, state: FSMContext):
+	"""Обработчик кнопки продолжения загрузки документации"""
+	lot_number = query.data.split(":", 2)[2]
+	
+	# Проверяем, что состояние еще активно
+	data = await state.get_data()
+	if not data.get("lot_number"):
+		await state.update_data(lot_number=lot_number)
+	
+	await state.set_state(DocumentationStates.waiting_document)
+	
+	await query.message.edit_text(
+		f"📎 <b>Загрузка документации для лота {lot_number}</b>\n\n"
+		f"Отправьте следующий файл с конкурсной документацией.\n\n"
+		f"<b>Поддерживаемые форматы:</b> PDF, DOCX, DOC, TXT, RTF, XLSX, XLS\n\n"
+		f"<i>Для отмены отправьте /cancel</i>",
+		parse_mode="HTML"
+	)
+	await query.answer()
+
+
+@router.callback_query(F.data.startswith("doc:finish_upload:"))
+async def finish_upload_doc_cb(query, db_user: User, state: FSMContext):
+	"""Обработчик завершения загрузки документации - объединяет все файлы и сохраняет"""
+	lot_number = query.data.split(":", 2)[2]
+	
+	data = await state.get_data()
+	uploaded_files = data.get("uploaded_files", [])
+	uploaded_texts = data.get("uploaded_texts", [])
+	
+	if not uploaded_files:
+		await query.answer("❌ Нет загруженных файлов", show_alert=True)
+		await state.clear()
+		return
+	
+	try:
+		await query.answer("💾 Сохраняю документацию...")
+		
+		# Объединяем все тексты из загруженных файлов
+		combined_text = "\n\n".join([
+			f"=== Файл: {file_info['filename']} ===\n{file_info['text']}"
+			for file_info in uploaded_files
+			if file_info.get('text')
+		])
+		
+		# Если текста нет, используем пустую строку
+		if not combined_text:
+			combined_text = ""
+		
+		# Определяем основной путь к документации (первый файл или объединенный)
+		main_file_path = uploaded_files[0]["path"]
+		
+		# Сохраняем в БД
+		async with async_session_maker() as session:
+			lot_repo = LotRepository(session)
+			lot = await lot_repo.get_by_lot_number(lot_number)
+			
+			if lot:
+				lot.documentation_path = main_file_path
+				lot.documentation_text = combined_text
+				lot.documentation_analyzed = False
+				await lot_repo.update(lot)
+				logger.info(f"Documentation saved for lot {lot_number}: {len(uploaded_files)} files, {len(combined_text)} characters")
+		
+		# Очищаем состояние
+		await state.clear()
+		
+		# Формируем итоговое сообщение
+		total_size = sum(f.get("size", 0) for f in uploaded_files)
+		text = (
+			f"✅ <b>Документация успешно сохранена!</b>\n\n"
+			f"📦 Загружено файлов: {len(uploaded_files)}\n"
+			f"📄 Всего символов текста: {len(combined_text)}\n"
+			f"📊 Общий размер: {total_size / 1024:.1f} КБ\n\n"
+		)
+		
+		if combined_text:
+			text += "Теперь вы можете проанализировать документацию."
+		else:
+			text += "⚠️ Текст не был извлечен из файлов. Файлы сохранены, но анализ может быть недоступен."
+		
+		# Получаем лот для проверки URL
+		async with async_session_maker() as session:
+			lot_repo = LotRepository(session)
+			lot = await lot_repo.get_by_lot_number(lot_number)
+			has_url = bool(lot.url) if lot else False
+		
+		keyboard = _lot_detail_keyboard(
+			lot_number, 
+			has_documentation=True, 
+			has_url=has_url,
+			review_status=lot.review_status if lot else None
+		)
+		
+		await query.message.edit_text(text, parse_mode="HTML", reply_markup=keyboard)
+		
+	except Exception as e:
+		logger.error(f"Error finishing documentation upload: {e}", exc_info=True)
+		await query.message.edit_text(
+			f"❌ <b>Ошибка при сохранении документации</b>\n\n"
+			f"<code>{str(e)}</code>\n\n"
+			f"Попробуйте загрузить файлы заново.",
+			parse_mode="HTML"
+		)
+		await state.clear()
+
+
+@router.callback_query(F.data.startswith("doc:cancel_upload:"))
+async def cancel_upload_doc_cb(query, db_user: User, state: FSMContext):
+	"""Обработчик отмены загрузки документации"""
+	lot_number = query.data.split(":", 2)[2]
+	
+	data = await state.get_data()
+	uploaded_files = data.get("uploaded_files", [])
+	
+	# Очищаем состояние
+	await state.clear()
+	
+	if uploaded_files:
+		await query.answer("❌ Загрузка отменена. Загруженные файлы не сохранены.", show_alert=True)
+	else:
+		await query.answer("❌ Загрузка отменена")
+	
+	# Возвращаемся к деталям лота
+	async with async_session_maker() as session:
+		lot_repo = LotRepository(session)
+		lot = await lot_repo.get_by_lot_number(lot_number)
+		has_url = bool(lot.url) if lot else False
+	
+	keyboard = _lot_detail_keyboard(
+		lot_number, 
+		has_documentation=bool(lot.documentation_path) if lot else False, 
+		has_url=has_url,
+		review_status=lot.review_status if lot else None
+	)
+	
+	await query.message.edit_text(
+		f"📋 <b>Лот {lot_number}</b>\n\n"
+		f"Загрузка документации отменена.",
+		parse_mode="HTML",
+		reply_markup=keyboard
+	)
+
+
 @router.message(F.text == "/cancel", StateFilter(DocumentationStates.waiting_document))
 async def cancel_documentation_upload(message: Message, state: FSMContext):
-	"""Отмена загрузки документации"""
+	"""Обработчик отмены загрузки документации через команду /cancel"""
+	data = await state.get_data()
+	lot_number = data.get("lot_number")
+	uploaded_files = data.get("uploaded_files", [])
+	
+	# Очищаем состояние
 	await state.clear()
-	await message.answer("❌ Загрузка документации отменена.")
+	
+	if uploaded_files:
+		await message.answer(
+			"❌ <b>Загрузка отменена</b>\n\n"
+			f"Загружено файлов: {len(uploaded_files)}\n"
+			"Загруженные файлы не сохранены.",
+			parse_mode="HTML"
+		)
+	else:
+		await message.answer("❌ Загрузка документации отменена.", parse_mode="HTML")
+	
+	# Возвращаемся к деталям лота, если номер лота известен
+	if lot_number:
+		async with async_session_maker() as session:
+			lot_repo = LotRepository(session)
+			lot = await lot_repo.get_by_lot_number(lot_number)
+			has_url = bool(lot.url) if lot else False
+		
+		keyboard = _lot_detail_keyboard(
+			lot_number, 
+			has_documentation=bool(lot.documentation_path) if lot else False, 
+			has_url=has_url,
+			review_status=lot.review_status if lot else None
+		)
+		
+		await message.answer(
+			f"📋 <b>Лот {lot_number}</b>",
+			parse_mode="HTML",
+			reply_markup=keyboard
+		)
 
 
 @router.message(F.text == "➕ Создать лот")
@@ -1694,7 +1894,7 @@ async def analyze_manual_documentation(query, db_user: User, state: FSMContext):
 		await send_long_message(
 			query.message.bot,
 			query.message.chat.id,
-			f"📄 <b>Предварительный анализ документации</b>\n\n"
+			f"📄 <b>Детальный анализ лота</b>\n\n"
 			f"📎 Файл: {filename}\n\n"
 			f"{analysis}",
 			parse_mode="HTML",

@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>План выступления для защиты проекта | Нейро-сотрудники на GPT</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        header .subtitle {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            opacity: 0.95;
+        }
+        
+        header .meta {
+            font-size: 1em;
+            opacity: 0.85;
+            margin-top: 10px;
+        }
+        
+        nav {
+            background: #f8f9fa;
+            padding: 20px;
+            border-bottom: 2px solid #e9ecef;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        nav ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        nav a {
+            display: block;
+            padding: 10px 20px;
+            background: white;
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 5px;
+            border: 2px solid #667eea;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        
+        nav a:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .section {
+            margin-bottom: 50px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .section h2 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .section h3 {
+            color: #764ba2;
+            font-size: 1.5em;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        
+        .section h4 {
+            color: #555;
+            font-size: 1.2em;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .subsection {
+            margin-left: 20px;
+            margin-top: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 5px;
+            border-left: 3px solid #764ba2;
+        }
+        
+        .subsection ul, .subsection ol {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+        
+        .subsection li {
+            margin-bottom: 8px;
+        }
+        
+        .text-block {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+            border-left: 3px solid #667eea;
+        }
+        
+        .text-block p {
+            margin-bottom: 10px;
+        }
+        
+        .text-block strong {
+            color: #667eea;
+        }
+        
+        .timing-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .timing-table th {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .timing-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .timing-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .highlight-box h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .checklist {
+            list-style: none;
+            margin-left: 0;
+        }
+        
+        .checklist li {
+            padding: 8px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+        
+        .checklist li:before {
+            content: "☐";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-size: 1.2em;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            background: #667eea;
+            color: white;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+            margin-right: 10px;
+        }
+        
+        .badge-success {
+            background: #28a745;
+        }
+        
+        .badge-info {
+            background: #17a2b8;
+        }
+        
+        .badge-warning {
+            background: #ffc107;
+            color: #333;
+        }
+        
+        .qa-item {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .qa-item h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .qa-item .answer {
+            color: #555;
+            margin-left: 20px;
+        }
+        
+        .qa-item .answer ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+        
+        .visual-note {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        
+        .visual-note strong {
+            color: #856404;
+        }
+        
+        .footer {
+            background: #f8f9fa;
+            padding: 30px;
+            text-align: center;
+            border-top: 2px solid #e9ecef;
+            color: #667eea;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+        
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            nav {
+                display: none;
+            }
+            
+            .section {
+                page-break-inside: avoid;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>ПЛАН ВЫСТУПЛЕНИЯ ДЛЯ ЗАЩИТЫ ПРОЕКТА</h1>
+            <div class="subtitle">Этап #6. Нейро-сотрудники на GPT | Защита итогового проекта</div>
+            <div class="meta">
+                <strong>Длительность:</strong> 10-17 минут | 
+                <strong>Формат:</strong> Онлайн-встреча с куратором | 
+                <strong>Дата подготовки:</strong> 1 декабря 2025
+            </div>
+        </header>
+        
+        <nav>
+            <ul>
+                <li><a href="#intro">Введение</a></li>
+                <li><a href="#solution">Решение</a></li>
+                <li><a href="#neuro">Нейро-сотрудник</a></li>
+                <li><a href="#demo">Демонстрация</a></li>
+                <li><a href="#results">Результаты</a></li>
+                <li><a href="#tech">Технические детали</a></li>
+                <li><a href="#conclusion">Заключение</a></li>
+                <li><a href="#timing">Тайминг</a></li>
+                <li><a href="#qa">Вопросы</a></li>
+            </ul>
+        </nav>
+        
+        <div class="content">
+            <!-- 1. ВВЕДЕНИЕ -->
+            <section id="intro" class="section">
+                <h2>1. ВВЕДЕНИЕ <span class="badge">1-2 минуты</span></h2>
+                
+                <div class="subsection">
+                    <h3>1.1. Приветствие и представление проекта</h3>
+                    <div class="text-block">
+                        <p><strong>Текст:</strong></p>
+                        <p>"Добрый день! Меня зовут [Ваше имя]."</p>
+                        <p>"Сегодня я представляю проект: <strong>AI-ассистент закупок РМКСИБ</strong> — интеллектуальный помощник для автоматизированного анализа закупок в промышленности."</p>
+                        <p>"Проект реализован в виде Telegram-бота с интеграцией больших языковых моделей для принятия решений."</p>
+                    </div>
+                </div>
+                
+                <div class="subsection">
+                    <h3>1.2. Актуальность и проблема</h3>
+                    <div class="text-block">
+                        <p><strong>Текст:</strong></p>
+                        <p>"В современной промышленности процесс анализа закупок занимает много времени и требует экспертных знаний."</p>
+                        <p>"Специалистам необходимо оценивать риски, искать поставщиков, анализировать документацию — это рутинные задачи, которые можно автоматизировать."</p>
+                        <p>"Наш проект решает эту проблему с помощью нейро-сотрудника на базе GPT-моделей."</p>
+                    </div>
+                </div>
+                
+                <div class="subsection">
+                    <h3>1.3. Цель проекта</h3>
+                    <div class="text-block">
+                        <p><strong>Текст:</strong></p>
+                        <p>"Цель проекта — создать интеллектуального помощника, который автоматизирует анализ закупок, снижает риски участия в невыгодных конкурсах и ускоряет принятие решений."</p>
+                    </div>
+                </div>
+                
+                <div class="visual-note">
+                    <strong>Визуал:</strong> Слайд с названием проекта и ключевой проблемой
+                </div>
+            </section>
+            
+            <!-- 2. ОПИСАНИЕ РЕШЕНИЯ -->
+            <section id="solution" class="section">
+                <h2>2. ОПИСАНИЕ РЕШЕНИЯ <span class="badge badge-info">3-4 минуты</span></h2>
+                
+                <div class="subsection">
+                    <h3>2.1. Архитектура системы</h3>
+                    <div class="text-block">
+                        <p><strong>Текст:</strong></p>
+                        <p>"Система состоит из нескольких ключевых компонентов:"</p>
+                        <ul>
+                            <li><strong>Telegram-бот</strong> — интерфейс взаимодействия с пользователями</li>
+                            <li><strong>База данных PostgreSQL</strong> — хранение лотов, поставщиков, коммерческих предложений</li>
+                            <li><strong>AI-модуль</strong> — интеграция с Perplexity AI для анализа</li>
+                            <li><strong>Парсеры</strong> — автоматический сбор данных с платформ закупок</li>
+                            <li><strong>Django Admin Panel</strong> — веб-интерфейс для управления данными</li>
+                        </ul>
+                    </div>
+                    <div class="visual-note">
+                        <strong>Визуал:</strong> Схема архитектуры системы
+                    </div>
+                </div>
+                
+                <div class="subsection">
+                    <h3>2.2. Основные функции</h3>
+                    <div class="text-block">
+                        <p><strong>Текст:</strong></p>
+                        <p>"Реализованы следующие ключевые функции:"</p>
+                        
+                        <ol>
+                            <li><strong>Управление закупками</strong>
+                                <ul>
+                                    <li>Автоматический парсинг лотов с платформы ПАВЛИК</li>
+                                    <li>Фильтрация по настройкам пользователя (заказчики, номенклатура, бюджет)</li>
+                                    <li>Хранение и управление лотами в базе данных</li>
+                                </ul>
+                            </li>
+                            
+                            <li><strong>AI-анализ лотов</strong>
+                                <ul>
+                                    <li>Анализ целесообразности участия в конкурсных процедурах</li>
+                                    <li>Оценка рисков по 10-балльной шкале (редкость товара, санкции, бюджет, другие факторы)</li>
+                                    <li>Расчет интегральной оценки риска с весовыми коэффициентами</li>
+                                    <li>Генерация структурированных рекомендаций</li>
+                                </ul>
+                            </li>
+                            
+                            <li><strong>Анализ коммерческих предложений</strong>
+                                <ul>
+                                    <li>Сравнение предложений от разных поставщиков</li>
+                                    <li>Расчет интегрального рейтинга КП</li>
+                                    <li>Выявление лучших предложений</li>
+                                </ul>
+                            </li>
+                            
+                            <li><strong>Поиск поставщиков</strong>
+                                <ul>
+                                    <li>Автоматический поиск российских поставщиков по номенклатуре</li>
+                                    <li>Извлечение контактов и информации о компаниях</li>
+                                    <li>Оценка надежности поставщиков</li>
+                                </ul>
+                            </li>
+                            
+                            <li><strong>Email уведомления</strong>
+                                <ul>
+                                    <li>Автоматические уведомления о новых релевантных лотах</li>
+                                    <li>Фильтрация по настройкам пользователя</li>
+                                </ul>
+                            </li>
+                            
+                            <li><strong>Статистика и аналитика</strong>
+                                <ul>
+                                    <li>Статистика по лотам, КП, поставщикам, пользователям</li>
+                                    <li>Визуализация данных для принятия решений</li>
+                                </ul>
+                            </li>
+                        </ol>
+                    </div>
+                    <div class="visual-note">
+                        <strong>Визуал:</strong> Слайд с перечнем функций и скриншотами интерфейса
+                    </div>
+                </div>
+                
+                <div class="subsection">
+                    <h3>2.3. Технологический стек</h3>
+                    <div class="text-block">
+                        <p><strong>Текст:</strong></p>
+                        <p>"Для реализации использованы следующие технологии:"</p>
+                        <ul>
+                            <li><strong>Python 3.11+</strong> — основной язык программирования</li>
+                            <li><strong>aiogram 3.10+</strong> — фреймворк для Telegram-бота</li>
+                            <li><strong>PostgreSQL</strong> — база данных</li>
+                            <li><strong>Perplexity AI</strong> (модель sonar/sonar-pro) — большая языковая модель</li>
+                            <li><strong>Django</strong> — веб-интерфейс админ-панели</li>
+                            <li><strong>Docker</strong> — контейнеризация для развертывания</li>
+                            <li><strong>Alembic</strong> — миграции базы данных</li>
+                        </ul>
+                    </div>
+                    <div class="visual-note">
+                        <strong>Визуал:</strong> Слайд с логотипами технологий
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 3. РЕАЛИЗАЦИЯ НЕЙРО-СОТРУДНИКА -->
+            <section id="neuro" class="section">
+                <h2>3. РЕАЛИЗАЦИЯ НЕЙРО-СОТРУДНИКА <span class="badge badge-info">3-4 минуты</span></h2>
+                
+                <div class="subsection">
+                    <h3>3.1. Структура нейро-сотрудника</h3>
+                    <div class="text-block">
+                        <p><strong>Текст:</strong></p>
+                        <p>"Нейро-сотрудник построен по модульной архитектуре:"</p>
+                        
+                        <p><strong>Модуль обработки запросов:</strong></p>
+                        <ul>
+                            <li>Парсинг входных данных (номер лота, параметры)</li>
+                            <li>Валидация и формирование контекста</li>
+                        </ul>
+                        
+                        <p><strong>Модуль формирования промптов:</strong></p>
+                        <ul>
+                            <li>Базовый промпт для быстрого анализа</li>
+                            <li>Расширенный промпт с количественными оценками</li>
+                            <li>Специализированные промпты для поиска поставщиков</li>
+                        </ul>
+                        
+                        <p><strong>Модуль взаимодействия с LLM:</strong></p>
+                        <ul>
+                            <li>Интеграция с Perplexity API</li>
+                            <li>Обработка ошибок и повторные попытки</li>
+                            <li>Управление токенами и параметрами</li>
+                        </ul>
+                        
+                        <p><strong>Модуль обработки ответов:</strong></p>
+                        <ul>
+                            <li>Парсинг структурированного ответа</li>
+                            <li>Извлечение оценок и рекомендаций</li>
+                            <li>Форматирование для пользователя</li>
+                        </ul>
+                    </div>
+                    <div class="visual-note">
+                        <strong>Визуал:</strong> Диаграмма архитектуры нейро-сотрудника
+                    </div>
+                </div>
+                
+                <div class="subsection">
+                    <h3>3.2. Система оценки рисков</h3>
+                    <div class="text-block">
+                        <p><strong>Текст:</strong></p>
+                        <p>"Реализована система количественной оценки рисков по 10-балльной шкале:"</p>
+                        
+                        <p><strong>Параметры оценки:</strong></p>
+                        <ol>
+                            <li>Редкость/нишевость товара (вес 0.2)</li>
+                            <li>Риски санкций (вес 0.3)</li>
+                            <li>Превышение бюджета (вес 0.3)</li>
+                            <li>Другие факторы (вес 0.2)</li>
+                        </ol>
+                        
+                        <p><strong>Интегральная оценка риска:</strong></p>
+                        <ul>
+                            <li>Рассчитывается по формуле с весовыми коэффициентами</li>
+                            <li>Интерпретация: ≤4.0 — участвовать, 4.1-6.0 — участвовать с осторожностью, >6.0 — не участвовать</li>
+                        </ul>
+                        
+                        <div class="highlight-box">
+                            <p><strong>Пример результата:</strong></p>
+                            <ul>
+                                <li>Редкость товара: 2/10 — массовый товар</li>
+                                <li>Риски санкций: 6/10 — умеренные риски</li>
+                                <li>Превышение бюджета: 0/10 — бюджет в пределах нормы</li>
+                                <li>Другие факторы: 5/10 — стандартные условия</li>
+                                <li><strong>Интегральная оценка: 3.4/10</strong> → Рекомендация: Участвовать</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="visual-note">
+                        <strong>Визуал:</strong> Пример структурированного ответа нейро-сотрудника
+                    </div>
+                </div>
+                
+                <div class="subsection">
+                    <h3>3.3. Эксперименты и оптимизация</h3>
+                    <div class="text-block">
+                        <p><strong>Текст:</strong></p>
+                        <p>"Проведена серия экспериментов для оптимизации работы нейро-сотрудника:"</p>
+                        
+                        <p><strong>Эксперименты:</strong></p>
+                        <ul>
+                            <li>Сравнение базового и расширенного промптов</li>
+                            <li>Тестирование разных значений temperature (0.1, 0.2, 0.5, 0.7)</li>
+                            <li>Сравнение моделей sonar и sonar-pro</li>
+                            <li>Оптимизация параметров max_tokens</li>
+                        </ul>
+                        
+                        <div class="highlight-box">
+                            <p><strong>Результаты:</strong></p>
+                            <ul>
+                                <li>Успешность экспериментов: <span class="badge badge-success">100%</span></li>
+                                <li>Среднее время выполнения: 14.2 секунды</li>
+                                <li>Оптимальные параметры: sonar, temperature=0.2, max_tokens=2000</li>
+                                <li>Для сложных задач рекомендуется sonar-pro (время 24 сек, но более детальный анализ)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="visual-note">
+                        <strong>Визуал:</strong> Таблица результатов экспериментов
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 4. ДЕМОНСТРАЦИЯ РАБОТЫ -->
+            <section id="demo" class="section">
+                <h2>4. ДЕМОНСТРАЦИЯ РАБОТЫ <span class="badge badge-warning">2-3 минуты</span></h2>
+                
+                <div class="subsection">
+                    <h3>4.1. Демонстрация основных функций</h3>
+                    <div class="text-block">
+                        <p><strong>Текст:</strong></p>
+                        <p>"Продемонстрирую работу системы на примере:"</p>
+                        
+                        <p><strong>Сценарий:</strong></p>
+                        <ol>
+                            <li>Пользователь получает уведомление о новом лоте</li>
+                            <li>Запрашивает анализ лота через бота</li>
+                            <li>Нейро-сотрудник анализирует лот и выдает структурированный ответ с оценками</li>
+                            <li>Пользователь запрашивает поиск поставщиков</li>
+                            <li>Система находит 5-10 поставщиков с контактами</li>
+                            <li>Пользователь может сохранить результаты и принять решение</li>
+                        </ol>
+                    </div>
+                    <div class="visual-note">
+                        <strong>Визуал:</strong> Скриншоты или запись работы бота
+                    </div>
+                </div>
+                
+                <div class="subsection">
+                    <h3>4.2. Примеры результатов</h3>
+                    <div class="text-block">
+                        <p><strong>Текст:</strong></p>
+                        <p>"Пример структурированного ответа нейро-сотрудника включает:"</p>
+                        <ul>
+                            <li>Оценки по параметрам с обоснованием</li>
+                            <li>Интегральную оценку риска</li>
+                            <li>Четкую рекомендацию (участвовать/не участвовать)</li>
+                            <li>Ключевые риски и способы их снижения</li>
+                            <li>Выявленные возможности и выгоды</li>
+                            <li>Конкретные следующие шаги</li>
+                        </ul>
+                    </div>
+                    <div class="visual-note">
+                        <strong>Визуал:</strong> Пример реального ответа нейро-сотрудника
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 5. РЕЗУЛЬТАТЫ И МЕТРИКИ -->
+            <section id="results" class="section">
+                <h2>5. РЕЗУЛЬТАТЫ И МЕТРИКИ <span class="badge">1-2 минуты</span></h2>
+                
+                <div class="subsection">
+                    <h3>5.1. Достигнутые результаты</h3>
+                    <div class="text-block">
+                        <p><strong>Текст:</strong></p>
+                        <p>"В результате разработки достигнуто:"</p>
+                        
+                        <p><span class="badge badge-success">✅ Функциональность:</span></p>
+                        <ul>
+                            <li>Реализованы все запланированные функции</li>
+                            <li>Система готова к продакшену (MVP)</li>
+                            <li>Интеграция с внешними сервисами работает стабильно</li>
+                        </ul>
+                        
+                        <p><span class="badge badge-success">✅ Производительность:</span></p>
+                        <ul>
+                            <li>Время анализа лота: 10-25 секунд (в зависимости от сложности)</li>
+                            <li>Успешность запросов: <strong>100%</strong></li>
+                            <li>Система обрабатывает до 20 заявок в день</li>
+                        </ul>
+                        
+                        <p><span class="badge badge-success">✅ Качество анализа:</span></p>
+                        <ul>
+                            <li>Структурированные ответы с количественными оценками</li>
+                            <li>Детальные обоснования рекомендаций</li>
+                            <li>Практические советы для принятия решений</li>
+                        </ul>
+                    </div>
+                    <div class="visual-note">
+                        <strong>Визуал:</strong> Слайд с ключевыми метриками
+                    </div>
+                </div>
+                
+                <div class="subsection">
+                    <h3>5.2. Преимущества решения</h3>
+                    <div class="text-block">
+                        <p><strong>Текст:</strong></p>
+                        <p>"Преимущества нашего решения:"</p>
+                        
+                        <ol>
+                            <li><strong>Автоматизация рутинных задач</strong>
+                                <ul>
+                                    <li>Сокращение времени анализа с часов до минут</li>
+                                    <li>Автоматическая оценка рисков и возможностей</li>
+                                </ul>
+                            </li>
+                            
+                            <li><strong>Объективность оценок</strong>
+                                <ul>
+                                    <li>Структурированный подход к анализу</li>
+                                    <li>Учет множества факторов одновременно</li>
+                                    <li>Минимизация человеческих ошибок</li>
+                                </ul>
+                            </li>
+                            
+                            <li><strong>Актуальность информации</strong>
+                                <ul>
+                                    <li>Использование онлайн-поиска Perplexity</li>
+                                    <li>Актуальные данные о санкциях и ценах</li>
+                                    <li>Информация о репутации поставщиков</li>
+                                </ul>
+                            </li>
+                            
+                            <li><strong>Масштабируемость</strong>
+                                <ul>
+                                    <li>Возможность обработки большого количества лотов</li>
+                                    <li>Параллельная обработка запросов</li>
+                                    <li>Интеграция с существующими системами</li>
+                                </ul>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 6. ТЕХНИЧЕСКИЕ ДЕТАЛИ -->
+            <section id="tech" class="section">
+                <h2>6. ТЕХНИЧЕСКИЕ ДЕТАЛИ <span class="badge">1-2 минуты</span></h2>
+                
+                <div class="subsection">
+                    <h3>6.1. База данных</h3>
+                    <div class="text-block">
+                        <p><strong>Текст:</strong></p>
+                        <p>"Структура базы данных включает следующие основные таблицы:"</p>
+                        <ul>
+                            <li><strong>lots</strong> — лоты закупок (номер, платформа, название, бюджет, дедлайн, номенклатура)</li>
+                            <li><strong>suppliers</strong> — поставщики (название, ИНН, сайт, рейтинг надежности)</li>
+                            <li><strong>commercial_proposals</strong> — коммерческие предложения (лот, поставщик, цена, рейтинг)</li>
+                            <li><strong>users</strong> — пользователи (Telegram ID, роль, email)</li>
+                            <li><strong>user_preferences</strong> — настройки пользователей (заказчики, номенклатура, бюджет)</li>
+                        </ul>
+                    </div>
+                    <div class="visual-note">
+                        <strong>Визуал:</strong> ER-диаграмма базы данных
+                    </div>
+                </div>
+                
+                <div class="subsection">
+                    <h3>6.2. Развертывание</h3>
+                    <div class="text-block">
+                        <p><strong>Текст:</strong></p>
+                        <p>"Система развернута с использованием Docker Compose:"</p>
+                        <ul>
+                            <li>Контейнер для бота</li>
+                            <li>Контейнер для PostgreSQL</li>
+                            <li>Контейнер для Django Admin Panel</li>
+                            <li>Простое развертывание одной командой: <code>docker compose up -d</code></li>
+                        </ul>
+                        
+                        <p>"Требования к ресурсам:"</p>
+                        <ul>
+                            <li>Минимальная конфигурация: 2 CPU, 2 ГБ RAM, 20 ГБ SSD</li>
+                            <li>Рекомендуемая конфигурация: 4 CPU, 4-8 ГБ RAM, 100 ГБ SSD</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 7. ЗАКЛЮЧЕНИЕ И ПЕРСПЕКТИВЫ -->
+            <section id="conclusion" class="section">
+                <h2>7. ЗАКЛЮЧЕНИЕ И ПЕРСПЕКТИВЫ <span class="badge">1-2 минуты</span></h2>
+                
+                <div class="subsection">
+                    <h3>7.1. Итоги проекта</h3>
+                    <div class="text-block">
+                        <p><strong>Текст:</strong></p>
+                        <p>"В рамках проекта успешно создан AI-ассистент для автоматизированного анализа закупок."</p>
+                        <p>"Реализованы все запланированные функции, система протестирована и готова к использованию."</p>
+                        <p>"Нейро-сотрудник демонстрирует высокую эффективность в анализе закупок и принятии решений."</p>
+                    </div>
+                </div>
+                
+                <div class="subsection">
+                    <h3>7.2. Перспективы развития</h3>
+                    <div class="text-block">
+                        <p><strong>Текст:</strong></p>
+                        <p>"Возможные направления дальнейшего развития:"</p>
+                        
+                        <p><strong>Кратковременные (1-2 месяца):</strong></p>
+                        <ul>
+                            <li>Улучшение качества промптов на основе обратной связи</li>
+                            <li>Расширение функциональности (анализ нескольких лотов одновременно)</li>
+                            <li>Оптимизация производительности (кэширование, параллельная обработка)</li>
+                        </ul>
+                        
+                        <p><strong>Среднесрочные (3-6 месяцев):</strong></p>
+                        <ul>
+                            <li>Интеграция с другими LLM (OpenAI GPT-4, YandexGPT)</li>
+                            <li>Машинное обучение для улучшения оценок на исторических данных</li>
+                            <li>Расширенная аналитика и отчетность</li>
+                        </ul>
+                        
+                        <p><strong>Долгосрочные (6-12 месяцев):</strong></p>
+                        <ul>
+                            <li>Fine-tuning специализированной модели на данных закупок</li>
+                            <li>Мультимодальный анализ (изображения, чертежи)</li>
+                            <li>Прогнозирование результатов конкурсов</li>
+                            <li>Автоматизация полного цикла (от поиска до подачи заявки)</li>
+                        </ul>
+                    </div>
+                    <div class="visual-note">
+                        <strong>Визуал:</strong> Слайд с roadmap развития
+                    </div>
+                </div>
+                
+                <div class="subsection">
+                    <h3>7.3. Благодарность</h3>
+                    <div class="text-block">
+                        <p><strong>Текст:</strong></p>
+                        <p>"Спасибо за внимание!"</p>
+                        <p>"Готов ответить на ваши вопросы."</p>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- ТАЙМИНГ ВЫСТУПЛЕНИЯ -->
+            <section id="timing" class="section">
+                <h2>ТАЙМИНГ ВЫСТУПЛЕНИЯ</h2>
+                
+                <table class="timing-table">
+                    <thead>
+                        <tr>
+                            <th>Раздел</th>
+                            <th>Время</th>
+                            <th>Накопительное время</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1. Введение</td>
+                            <td>1-2 мин</td>
+                            <td>1-2 мин</td>
+                        </tr>
+                        <tr>
+                            <td>2. Описание решения</td>
+                            <td>3-4 мин</td>
+                            <td>4-6 мин</td>
+                        </tr>
+                        <tr>
+                            <td>3. Реализация нейро-сотрудника</td>
+                            <td>3-4 мин</td>
+                            <td>7-10 мин</td>
+                        </tr>
+                        <tr>
+                            <td>4. Демонстрация работы</td>
+                            <td>2-3 мин</td>
+                            <td>9-13 мин</td>
+                        </tr>
+                        <tr>
+                            <td>5. Результаты и метрики</td>
+                            <td>1-2 мин</td>
+                            <td>10-15 мин</td>
+                        </tr>
+                        <tr>
+                            <td>6. Технические детали</td>
+                            <td>1-2 мин</td>
+                            <td>11-17 мин</td>
+                        </tr>
+                        <tr>
+                            <td>7. Заключение и перспективы</td>
+                            <td>1-2 мин</td>
+                            <td>12-19 мин</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="highlight-box">
+                    <p><strong>Рекомендация:</strong> Стремиться к 12-15 минутам основного выступления, оставляя 2-3 минуты на вопросы.</p>
+                </div>
+            </section>
+            
+            <!-- КЛЮЧЕВЫЕ МОМЕНТЫ -->
+            <section class="section">
+                <h2>КЛЮЧЕВЫЕ МОМЕНТЫ ДЛЯ АКЦЕНТА</h2>
+                
+                <div class="text-block">
+                    <h3>Что обязательно подчеркнуть:</h3>
+                    
+                    <ol>
+                        <li><strong>Практическая ценность</strong>
+                            <ul>
+                                <li>Решение реальной бизнес-задачи</li>
+                                <li>Автоматизация рутинных процессов</li>
+                                <li>Экономия времени специалистов</li>
+                            </ul>
+                        </li>
+                        
+                        <li><strong>Техническая реализация</strong>
+                            <ul>
+                                <li>Использование современных технологий (LLM, Telegram Bot API)</li>
+                                <li>Модульная архитектура</li>
+                                <li>Готовность к продакшену</li>
+                            </ul>
+                        </li>
+                        
+                        <li><strong>Качество решения</strong>
+                            <ul>
+                                <li>Структурированный подход к анализу</li>
+                                <li>Количественные оценки рисков</li>
+                                <li>Детальные обоснования рекомендаций</li>
+                            </ul>
+                        </li>
+                        
+                        <li><strong>Экспериментальная работа</strong>
+                            <ul>
+                                <li>Проведение экспериментов для оптимизации</li>
+                                <li>Сравнение различных подходов</li>
+                                <li>Выбор оптимальных параметров</li>
+                            </ul>
+                        </li>
+                        
+                        <li><strong>Масштабируемость</strong>
+                            <ul>
+                                <li>Возможность обработки большого объема данных</li>
+                                <li>Готовность к расширению функциональности</li>
+                                <li>Интеграция с внешними системами</li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
+            </section>
+            
+            <!-- ПОДГОТОВКА К ВОПРОСАМ -->
+            <section id="qa" class="section">
+                <h2>ПОДГОТОВКА К ВОПРОСАМ</h2>
+                
+                <div class="qa-item">
+                    <h4>Вопрос 1: "Почему выбрали Perplexity, а не OpenAI GPT?"</h4>
+                    <div class="answer">
+                        <strong>Ответ:</strong>
+                        <ul>
+                            <li>Perplexity имеет встроенный онлайн-поиск, что критично для актуальной информации о санкциях и ценах</li>
+                            <li>Более доступная стоимость использования</li>
+                            <li>Хорошая поддержка русского языка</li>
+                            <li>В будущем планируется интеграция с другими моделями для сравнения</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="qa-item">
+                    <h4>Вопрос 2: "Как обеспечивается точность оценок нейро-сотрудника?"</h4>
+                    <div class="answer">
+                        <strong>Ответ:</strong>
+                        <ul>
+                            <li>Использование структурированных промптов с четкими требованиями</li>
+                            <li>Количественная оценка по 10-балльной шкале с обоснованием</li>
+                            <li>Интегральная оценка с весовыми коэффициентами</li>
+                            <li>Проведение экспериментов для оптимизации параметров</li>
+                            <li>В будущем планируется обучение на исторических данных для улучшения точности</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="qa-item">
+                    <h4>Вопрос 3: "Какие ограничения у системы?"</h4>
+                    <div class="answer">
+                        <strong>Ответ:</strong>
+                        <ul>
+                            <li>Зависимость от внешнего API (требуется стабильный интернет)</li>
+                            <li>Ограничения по количеству запросов (rate limits)</li>
+                            <li>Обработка больших документов ограничена 10,000 символов</li>
+                            <li>Требуется валидация результатов человеком для критичных решений</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="qa-item">
+                    <h4>Вопрос 4: "Как система обрабатывает ошибки?"</h4>
+                    <div class="answer">
+                        <strong>Ответ:</strong>
+                        <ul>
+                            <li>Реализована обработка ошибок API (401, 400, таймауты)</li>
+                            <li>Автоматические повторные попытки при сбоях</li>
+                            <li>Логирование всех запросов и ответов</li>
+                            <li>Уведомления администраторам об ошибках</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="qa-item">
+                    <h4>Вопрос 5: "Планируется ли коммерческое использование?"</h4>
+                    <div class="answer">
+                        <strong>Ответ:</strong>
+                        <ul>
+                            <li>Система разработана для внутреннего использования компанией РМКСИБ</li>
+                            <li>В перспективе возможно масштабирование для других компаний</li>
+                            <li>Требуется доработка для коммерческого использования (безопасность, масштабирование)</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- РЕКОМЕНДАЦИИ ПО ПРЕЗЕНТАЦИИ -->
+            <section class="section">
+                <h2>РЕКОМЕНДАЦИИ ПО ПРЕЗЕНТАЦИИ</h2>
+                
+                <div class="subsection">
+                    <h3>Структура презентации:</h3>
+                    <ol>
+                        <li><strong>Титульный слайд</strong> — название проекта, автор, дата</li>
+                        <li><strong>Проблема и актуальность</strong> (2-3 слайда)</li>
+                        <li><strong>Архитектура и функции</strong> (3-4 слайда)</li>
+                        <li><strong>Нейро-сотрудник</strong> (3-4 слайда)</li>
+                        <li><strong>Демонстрация</strong> (2-3 слайда)</li>
+                        <li><strong>Результаты</strong> (2-3 слайда)</li>
+                        <li><strong>Технические детали</strong> (1-2 слайда)</li>
+                        <li><strong>Перспективы</strong> (1-2 слайда)</li>
+                        <li><strong>Заключение</strong> (1 слайд)</li>
+                    </ol>
+                    <p><strong>Общее количество слайдов:</strong> 18-25 слайдов</p>
+                </div>
+                
+                <div class="subsection">
+                    <h3>Советы по выступлению:</h3>
+                    <ol>
+                        <li><strong>Речь:</strong> Говорить четко и не торопиться, делать паузы между разделами, использовать простой язык</li>
+                        <li><strong>Визуал:</strong> Использовать скриншоты и диаграммы, показывать реальные примеры работы</li>
+                        <li><strong>Демонстрация:</strong> Подготовить запись работы бота или готовность к live-демо</li>
+                        <li><strong>Взаимодействие:</strong> Поддерживать зрительный контакт, отвечать на вопросы по ходу</li>
+                    </ol>
+                </div>
+            </section>
+            
+            <!-- ЧЕКЛИСТ -->
+            <section class="section">
+                <h2>ЧЕКЛИСТ ПЕРЕД ЗАЩИТОЙ</h2>
+                
+                <div class="subsection">
+                    <h3>За неделю до защиты:</h3>
+                    <ul class="checklist">
+                        <li>Подготовить презентацию (18-25 слайдов)</li>
+                        <li>Подготовить демонстрацию работы системы</li>
+                        <li>Протестировать все функции бота</li>
+                        <li>Подготовить примеры результатов анализа</li>
+                    </ul>
+                </div>
+                
+                <div class="subsection">
+                    <h3>За день до защиты:</h3>
+                    <ul class="checklist">
+                        <li>Проверить техническое оборудование (микрофон, камера, интернет)</li>
+                        <li>Протестировать демонстрацию на том же оборудовании</li>
+                        <li>Повторить план выступления</li>
+                        <li>Подготовить ответы на возможные вопросы</li>
+                    </ul>
+                </div>
+                
+                <div class="subsection">
+                    <h3>В день защиты:</h3>
+                    <ul class="checklist">
+                        <li>Проверить подключение к интернету</li>
+                        <li>Открыть презентацию и демонстрацию</li>
+                        <li>Проверить звук и видео</li>
+                        <li>Быть готовым начать вовремя</li>
+                    </ul>
+                </div>
+            </section>
+            
+            <!-- ДОПОЛНИТЕЛЬНЫЕ МАТЕРИАЛЫ -->
+            <section class="section">
+                <h2>ДОПОЛНИТЕЛЬНЫЕ МАТЕРИАЛЫ</h2>
+                
+                <div class="subsection">
+                    <h3>Для подготовки презентации использовать:</h3>
+                    <ul>
+                        <li>Скриншоты из папки: <code>Этап #4. Создание финальной версии нейро-сотрудника/Скриншоты_Презентация/</code></li>
+                        <li>Диаграммы из файла: <code>DIAGRAMS_TELEGRAM_BOT.html</code></li>
+                        <li>Примеры из отчета: <code>NEURO_EMPLOYEE_REPORT.md</code></li>
+                        <li>Результаты экспериментов: <code>Эксперименты_нейро-сотрудник.md</code></li>
+                    </ul>
+                </div>
+                
+                <div class="subsection">
+                    <h3>Для демонстрации подготовить:</h3>
+                    <ul>
+                        <li>Запись работы бота (скринкаст)</li>
+                        <li>Примеры реальных лотов и их анализа</li>
+                        <li>Примеры поиска поставщиков</li>
+                        <li>Примеры коммерческих предложений</li>
+                    </ul>
+                </div>
+            </section>
+        </div>
+        
+        <div class="footer">
+            Удачи на защите! 🚀
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Презентация защиты проекта | AI-ассистент закупок РМКСИБ</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+        }
+        
+        .presentation-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+        
+        .slide {
+            width: 100%;
+            height: 100%;
+            display: block;
+            visibility: hidden;
+            opacity: 0;
+            padding: 60px;
+            background: white;
+            overflow-y: auto;
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+        
+        .slide.active {
+            visibility: visible;
+            opacity: 1;
+            pointer-events: auto;
+            animation: slideIn 0.5s ease-in-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .slide-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .slide-header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .slide-header h2 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .slide-header .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .slide-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .slide-content h3 {
+            color: #667eea;
+            font-size: 1.8em;
+            margin: 25px 0 15px 0;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .slide-content h4 {
+            color: #764ba2;
+            font-size: 1.4em;
+            margin: 20px 0 10px 0;
+        }
+        
+        .slide-content ul, .slide-content ol {
+            margin-left: 30px;
+            margin-bottom: 20px;
+            line-height: 1.8;
+        }
+        
+        .slide-content li {
+            margin-bottom: 10px;
+        }
+        
+        .slide-content p {
+            margin-bottom: 15px;
+            line-height: 1.8;
+            font-size: 1.1em;
+        }
+        
+        .slide-content strong {
+            color: #667eea;
+        }
+        
+        .diagram-container {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 5px solid #667eea;
+        }
+        
+        .mermaid {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            background: #667eea;
+            color: white;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+            margin-right: 10px;
+        }
+        
+        .badge-success {
+            background: #28a745;
+        }
+        
+        .badge-info {
+            background: #17a2b8;
+        }
+        
+        .badge-warning {
+            background: #ffc107;
+            color: #333;
+        }
+        
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 20px 0;
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .metric-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .metric-card .value {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .metric-card .label {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .navigation {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .nav-button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .nav-button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+        
+        .nav-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .slide-counter {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(102, 126, 234, 0.9);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            z-index: 1000;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        table th {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+        
+        @media (max-width: 768px) {
+            .slide {
+                padding: 30px 20px;
+            }
+            
+            .slide-header h1 {
+                font-size: 1.8em;
+            }
+            
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+            
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .fullscreen-diagram {
+            min-height: 500px;
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <!-- Слайд 1: Титульный -->
+        <div class="slide active">
+            <div class="slide-header">
+                <h1>AI-ассистент закупок РМКСИБ</h1>
+                <div class="subtitle">Нейро-сотрудник для автоматизированного анализа закупок</div>
+                <div style="margin-top: 20px; font-size: 1em; opacity: 0.85;">
+                    Этап #6. Нейро-сотрудники на GPT | Защита итогового проекта
+                </div>
+            </div>
+            <div class="slide-content" style="text-align: center; margin-top: 50px;">
+                <p style="font-size: 1.3em; color: #666;">
+                    Интеллектуальный помощник для автоматизированного анализа закупок в промышленности
+                </p>
+                <div style="margin-top: 50px;">
+                    <div class="badge badge-success">MVP готов к продакшену</div>
+                    <div class="badge badge-info">100% успешность экспериментов</div>
+                    <div class="badge badge-warning">10-25 сек время анализа</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Слайд 2: Проблема и актуальность -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2>1. Проблема и актуальность</h2>
+            </div>
+            <div class="slide-content">
+                <h3>Текущая ситуация</h3>
+                <ul>
+                    <li>Процесс анализа закупок занимает <strong>много времени</strong> и требует экспертных знаний</li>
+                    <li>Специалистам необходимо <strong>оценивать риски</strong>, искать поставщиков, анализировать документацию</li>
+                    <li>Это <strong>рутинные задачи</strong>, которые можно автоматизировать</li>
+                </ul>
+                
+                <h3>Решение</h3>
+                <div class="highlight-box">
+                    <p><strong>Нейро-сотрудник на базе GPT-моделей</strong> автоматизирует анализ закупок, снижает риски участия в невыгодных конкурсах и ускоряет принятие решений.</p>
+                </div>
+                
+                <h3>Цель проекта</h3>
+                <p>Создать интеллектуального помощника, который:</p>
+                <ul>
+                    <li>Автоматизирует анализ закупок</li>
+                    <li>Снижает риски участия в невыгодных конкурсах</li>
+                    <li>Ускоряет процесс принятия решений</li>
+                    <li>Предоставляет структурированные рекомендации на основе данных</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Слайд 3: Архитектура системы -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2>2. Архитектура системы</h2>
+            </div>
+            <div class="slide-content">
+                <h3>Компоненты системы</h3>
+                <ul>
+                    <li><strong>Telegram-бот</strong> — интерфейс взаимодействия с пользователями</li>
+                    <li><strong>База данных PostgreSQL</strong> — хранение лотов, поставщиков, коммерческих предложений</li>
+                    <li><strong>AI-модуль</strong> — интеграция с Perplexity AI для анализа</li>
+                    <li><strong>Парсеры</strong> — автоматический сбор данных с платформ закупок</li>
+                    <li><strong>Django Admin Panel</strong> — веб-интерфейс для управления данными</li>
+                </ul>
+                
+                <div class="diagram-container fullscreen-diagram">
+                    <div class="mermaid">
+graph TB
+    subgraph "Telegram API"
+        TG[Telegram Bot API]
+    end
+    
+    subgraph "Bot Application"
+        MAIN[bot/main.py<br/>Main Entry Point]
+        DP[Dispatcher<br/>FSM Storage]
+        
+        subgraph "Middlewares"
+            AUTH[AuthMiddleware<br/>Проверка доступа]
+            LOG[LoggingMiddleware<br/>Логирование]
+        end
+        
+        subgraph "Handlers"
+            START[start.py<br/>Старт бота]
+            LOTS[lots.py<br/>Управление лотами]
+            SUPPLIERS[suppliers.py<br/>Поставщики]
+            SEARCH[supplier_search.py<br/>Поиск поставщиков]
+            CP[commercial_proposals.py<br/>Коммерческие предложения]
+        end
+    end
+    
+    subgraph "Services Layer"
+        subgraph "AI Services"
+            PERPLEXITY[perplexity.py<br/>Perplexity AI]
+            CP_ANALYSIS[commercial_proposal_analysis.py<br/>Анализ КП]
+        end
+        
+        subgraph "Data Services"
+            PARSER[parsers/<br/>Парсинг закупок]
+            DOC[documentation/<br/>Обработка документов]
+            EMAIL[email/<br/>Email уведомления]
+        end
+    end
+    
+    subgraph "Database Layer"
+        DB[(PostgreSQL<br/>База данных)]
+        subgraph "Repositories"
+            USER_REPO[UserRepository]
+            LOT_REPO[LotRepository]
+            SUPPLIER_REPO[SupplierRepository]
+        end
+    end
+    
+    subgraph "External APIs"
+        PERPLEXITY_API[Perplexity API]
+        SNIPER_API[Sniper Search API]
+        SMTP[SMTP Server]
+    end
+    
+    TG -->|Webhook/Polling| MAIN
+    MAIN --> DP
+    DP --> AUTH
+    AUTH --> LOG
+    LOG --> START
+    LOG --> LOTS
+    LOG --> SUPPLIERS
+    LOG --> SEARCH
+    LOG --> CP
+    
+    LOTS --> PERPLEXITY
+    LOTS --> DOC
+    LOTS --> EMAIL
+    SEARCH --> PERPLEXITY
+    
+    PERPLEXITY --> PERPLEXITY_API
+    EMAIL --> SMTP
+    
+    LOTS --> LOT_REPO
+    LOT_REPO --> DB
+    
+    style MAIN fill:#e1f5ff
+    style DB fill:#ffe1f5
+    style PERPLEXITY_API fill:#e1ffe1
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Слайд 4: Основные функции -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2>3. Основные функции</h2>
+            </div>
+            <div class="slide-content">
+                <div class="two-column">
+                    <div>
+                        <h4>1. Управление закупками</h4>
+                        <ul>
+                            <li>Автоматический парсинг лотов с платформы ПАВЛИК</li>
+                            <li>Фильтрация по настройкам пользователя</li>
+                            <li>Хранение и управление лотами</li>
+                        </ul>
+                        
+                        <h4>2. AI-анализ лотов</h4>
+                        <ul>
+                            <li>Быстрый анализ (без документации)</li>
+                            <li>Детальный анализ (с документацией)</li>
+                            <li>Оценка рисков по 10-балльной шкале</li>
+                            <li>Расчет интегральной оценки риска</li>
+                            <li>Генерация рекомендаций</li>
+                            <li><strong>Итеративная загрузка документации</strong> (PDF, DOCX, XLSX и др.)</li>
+                        </ul>
+                        
+                        <h4>3. Анализ коммерческих предложений</h4>
+                        <ul>
+                            <li>Сравнение предложений</li>
+                            <li><strong>AI-анализ надежности поставщиков</strong></li>
+                            <li>Расчет интегрального рейтинга</li>
+                            <li>Выявление лучших предложений</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4>4. Поиск поставщиков</h4>
+                        <ul>
+                            <li>Автоматический поиск российских поставщиков</li>
+                            <li>Извлечение контактов и информации</li>
+                            <li>Оценка надежности поставщиков</li>
+                        </ul>
+                        
+                        <h4>5. Email уведомления</h4>
+                        <ul>
+                            <li>Автоматические уведомления о новых лотах</li>
+                            <li>Фильтрация по настройкам</li>
+                        </ul>
+                        
+                        <h4>6. Статистика и аналитика</h4>
+                        <ul>
+                            <li>Статистика по лотам, КП, поставщикам</li>
+                            <li>Визуализация данных</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Слайд 5: Технологический стек -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2>4. Технологический стек</h2>
+            </div>
+            <div class="slide-content">
+                <div class="two-column">
+                    <div>
+                        <h3>Backend</h3>
+                        <ul>
+                            <li><strong>Python 3.11+</strong> — основной язык программирования</li>
+                            <li><strong>aiogram 3.10+</strong> — фреймворк для Telegram-бота</li>
+                            <li><strong>PostgreSQL</strong> — база данных</li>
+                            <li><strong>Alembic</strong> — миграции базы данных</li>
+                        </ul>
+                        
+                        <h3>AI & ML</h3>
+                        <ul>
+                            <li><strong>Perplexity AI</strong> (sonar/sonar-pro) — большая языковая модель</li>
+                            <li>Онлайн-поиск актуальной информации</li>
+                            <li>Анализ на русском языке</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3>Infrastructure</h3>
+                        <ul>
+                            <li><strong>Docker</strong> — контейнеризация</li>
+                            <li><strong>Docker Compose</strong> — оркестрация</li>
+                            <li><strong>APScheduler</strong> — планировщик задач</li>
+                        </ul>
+                        
+                        <h3>Web Interface</h3>
+                        <ul>
+                            <li><strong>Django</strong> — веб-интерфейс админ-панели</li>
+                            <li>Управление данными через веб</li>
+                        </ul>
+                        
+                        <h3>External APIs</h3>
+                        <ul>
+                            <li>Telegram Bot API</li>
+                            <li>Perplexity API</li>
+                            <li>Sniper Search API</li>
+                            <li>SMTP для email</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Слайд 6: Структура нейро-сотрудника -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2>5. Структура нейро-сотрудника</h2>
+            </div>
+            <div class="slide-content">
+                <h3>Модульная архитектура</h3>
+                <div class="two-column">
+                    <div>
+                        <h4>Модуль обработки запросов</h4>
+                        <ul>
+                            <li>Парсинг входных данных</li>
+                            <li>Валидация параметров</li>
+                            <li>Формирование контекста</li>
+                        </ul>
+                        
+                        <h4>Модуль формирования промптов</h4>
+                        <ul>
+                            <li>Базовый промпт для быстрого анализа</li>
+                            <li>Расширенный промпт с оценками</li>
+                            <li>Специализированные промпты для каждого сценария</li>
+                            <li>Промпты для анализа надежности поставщиков</li>
+                            <li>Явный алгоритм анализа в промптах</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4>Модуль взаимодействия с LLM</h4>
+                        <ul>
+                            <li>Интеграция с Perplexity API</li>
+                            <li><strong>5 сценариев обращения к LLM:</strong></li>
+                            <li style="margin-left: 20px;">- analyze_lot (быстрый анализ)</li>
+                            <li style="margin-left: 20px;">- analyze_documentation (детальный анализ)</li>
+                            <li style="margin-left: 20px;">- search_suppliers (поиск поставщиков)</li>
+                            <li style="margin-left: 20px;">- analyze_supplier_reliability (анализ надежности)</li>
+                            <li style="margin-left: 20px;">- check_nomenclature_match_with_llm (семантическое сопоставление номенклатуры)</li>
+                            <li>Единая функция-обёртка call_llm_scenario()</li>
+                            <li>Структурированное логирование всех вызовов</li>
+                            <li>Обработка ошибок</li>
+                            <li>Управление токенами</li>
+                        </ul>
+                        
+                        <h4>Модуль обработки ответов</h4>
+                        <ul>
+                            <li>Парсинг структурированного ответа</li>
+                            <li>Извлечение оценок</li>
+                            <li>Форматирование для пользователя</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="diagram-container">
+                    <div class="mermaid">
+sequenceDiagram
+    participant User as Пользователь
+    participant Bot as Telegram Bot
+    participant Handler as lots.py Handler
+    participant DB as Database
+    participant AI as Perplexity Service
+    
+    User->>Bot: Нажимает "🧠 Анализ лота"
+    Bot->>Handler: analyze_lot_callback()
+    Handler->>DB: Проверить наличие документации
+    DB-->>Handler: Documentation status
+    
+    alt Документация есть
+        Handler->>AI: analyze_lot_enhanced(lot, doc_text)
+    else Документации нет
+        Handler->>AI: analyze_lot_basic(lot)
+    end
+    
+    AI->>AI: Формирование промпта
+    AI->>AI: Вызов Perplexity API
+    AI-->>Handler: AI анализ
+    Handler->>DB: Сохранить анализ
+    Handler-->>Bot: Отправить результат анализа
+    Bot-->>User: Показать анализ лота
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Слайд 7: Система оценки рисков -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2>6. Система оценки рисков</h2>
+            </div>
+            <div class="slide-content">
+                <h3>Параметры оценки (10-балльная шкала)</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Параметр</th>
+                                <th>Вес</th>
+                                <th>Описание</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Редкость/нишевость товара</td>
+                                <td>0.2</td>
+                                <td>Оценка доступности товара на рынке</td>
+                            </tr>
+                            <tr>
+                                <td>Риски санкций</td>
+                                <td>0.3</td>
+                                <td>Оценка рисков санкционных ограничений</td>
+                            </tr>
+                            <tr>
+                                <td>Превышение бюджета</td>
+                                <td>0.3</td>
+                                <td>Соответствие бюджета установленным порогам</td>
+                            </tr>
+                            <tr>
+                                <td>Другие факторы</td>
+                                <td>0.2</td>
+                                <td>Сроки, качество, логистика</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <h3>Интегральная оценка риска</h3>
+                <div class="highlight-box">
+                    <p><strong>Формула:</strong> Интегральная оценка = (Редкость × 0.2) + (Санкции × 0.3) + (Бюджет × 0.3) + (Другие × 0.2)</p>
+                    <p style="margin-top: 15px;"><strong>Интерпретация:</strong></p>
+                    <ul>
+                        <li>≤ 4.0 — <span class="badge badge-success">Участвовать</span></li>
+                        <li>4.1-6.0 — <span class="badge badge-warning">Участвовать с осторожностью</span></li>
+                        <li>> 6.0 — <span class="badge" style="background: #dc3545;">Не участвовать</span></li>
+                    </ul>
+                </div>
+                
+                <h3>Пример результата</h3>
+                <div class="highlight-box">
+                    <ul>
+                        <li>Редкость товара: <strong>2/10</strong> — массовый товар</li>
+                        <li>Риски санкций: <strong>6/10</strong> — умеренные риски</li>
+                        <li>Превышение бюджета: <strong>0/10</strong> — бюджет в пределах нормы</li>
+                        <li>Другие факторы: <strong>5/10</strong> — стандартные условия</li>
+                        <li style="margin-top: 10px; font-size: 1.2em;"><strong>Интегральная оценка: 3.4/10</strong> → <span class="badge badge-success">Рекомендация: Участвовать</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Слайд 8: Эксперименты и оптимизация -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2>7. Эксперименты и оптимизация</h2>
+            </div>
+            <div class="slide-content">
+                <h3>Проведенные эксперименты</h3>
+                <ul>
+                    <li>Сравнение базового и расширенного промптов</li>
+                    <li>Тестирование разных значений temperature (0.1, 0.2, 0.5, 0.7)</li>
+                    <li>Сравнение моделей sonar и sonar-pro</li>
+                    <li>Оптимизация параметров max_tokens</li>
+                </ul>
+                
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="value">100%</div>
+                        <div class="label">Успешность экспериментов</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="value">14.2 сек</div>
+                        <div class="label">Среднее время выполнения</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="value">10</div>
+                        <div class="label">Проведено экспериментов</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="value">sonar</div>
+                        <div class="label">Оптимальная модель</div>
+                    </div>
+                </div>
+                
+                <h3>Оптимальные параметры</h3>
+                <div class="highlight-box">
+                    <ul>
+                        <li><strong>Модель:</strong> sonar (для стандартных задач) / sonar-pro (для сложных)</li>
+                        <li><strong>Temperature:</strong> 0.2 (оптимальный баланс)</li>
+                        <li><strong>Max tokens:</strong> 
+                            <ul style="margin-top: 5px;">
+                                <li>2000 - для быстрого анализа (analyze_lot)</li>
+                                <li>2500 - для детального анализа (analyze_documentation)</li>
+                                <li>900 - для поиска поставщиков (search_suppliers)</li>
+                                <li>500 - для анализа надежности (analyze_supplier_reliability)</li>
+                            </ul>
+                        </li>
+                        <li><strong>Время выполнения:</strong> 10-25 секунд (в зависимости от сложности)</li>
+                        <li><strong>Единая функция-обёртка:</strong> call_llm_scenario() для большинства сценариев (5 сценариев всего)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Слайд 9: Демонстрация работы -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2>8. Демонстрация работы</h2>
+            </div>
+            <div class="slide-content">
+                <h3>Сценарий использования</h3>
+                <ol>
+                    <li>Пользователь получает уведомление о новом лоте</li>
+                    <li>Запрашивает анализ лота через бота</li>
+                    <li><strong>Загружает конкурсную документацию</strong> (PDF, DOCX, XLSX и др.) - можно загрузить несколько файлов подряд</li>
+                    <li>Нейро-сотрудник автоматически выбирает режим анализа:
+                        <ul style="margin-top: 10px;">
+                            <li>Быстрый анализ (если документация не загружена)</li>
+                            <li>Детальный анализ (если документация загружена)</li>
+                        </ul>
+                    </li>
+                    <li>Система анализирует лот и выдает структурированный ответ с оценками</li>
+                    <li>Пользователь запрашивает поиск поставщиков</li>
+                    <li>Система находит 5-10 поставщиков с контактами</li>
+                    <li>При сравнении коммерческих предложений система анализирует надежность поставщиков через LLM</li>
+                    <li>Пользователь может сохранить результаты и принять решение</li>
+                </ol>
+                
+                <h3>Пример структурированного ответа</h3>
+                <div class="highlight-box">
+                    <p><strong>📊 ОЦЕНКИ ПО ПАРАМЕТРАМ:</strong></p>
+                    <ul>
+                        <li>1. Редкость товара: 2/10 — массовый товар, широко представлен на рынке</li>
+                        <li>2. Риски санкций: 6/10 — умеренные риски, возможны косвенные ограничения</li>
+                        <li>3. Превышение бюджета: 0/10 — бюджет в пределах нормы</li>
+                        <li>4. Другие факторы: 5/10 — стандартные сроки</li>
+                    </ul>
+                    <p style="margin-top: 15px;"><strong>🎯 ИНТЕГРАЛЬНАЯ ОЦЕНКА РИСКА: 3.4/10</strong> (низкий риск)</p>
+                    <p><strong>✅ РЕКОМЕНДАЦИЯ: Участвовать</strong></p>
+                    <p><strong>📋 КЛЮЧЕВЫЕ РИСКИ:</strong> сроки поставки, качество ГОСТ</p>
+                    <p><strong>💡 ВОЗМОЖНОСТИ:</strong> стабильный заказчик, долгосрочное сотрудничество</p>
+                    <p><strong>🚀 СЛЕДУЮЩИЕ ШАГИ:</strong> изучить документацию, подготовить КП, найти поставщиков</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Слайд 10: Результаты и метрики -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2>9. Результаты и метрики</h2>
+            </div>
+            <div class="slide-content">
+                <h3>Достигнутые результаты</h3>
+                <div class="two-column">
+                    <div>
+                        <h4><span class="badge badge-success">✅ Функциональность</span></h4>
+                        <ul>
+                            <li>Реализованы все запланированные функции</li>
+                            <li>Система готова к продакшену (MVP)</li>
+                            <li>Интеграция с внешними сервисами работает стабильно</li>
+                        </ul>
+                        
+                        <h4><span class="badge badge-success">✅ Производительность</span></h4>
+                        <ul>
+                            <li>Время анализа лота: 10-25 секунд</li>
+                            <li>Успешность запросов: 100%</li>
+                            <li>Система обрабатывает до 20 заявок в день</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4><span class="badge badge-success">✅ Качество анализа</span></h4>
+                        <ul>
+                            <li>Структурированные ответы с количественными оценками</li>
+                            <li>Детальные обоснования рекомендаций</li>
+                            <li>Практические советы для принятия решений</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <h3>Преимущества решения</h3>
+                <div class="metrics-grid">
+                    <div class="highlight-box">
+                        <h4>Автоматизация</h4>
+                        <p>Сокращение времени анализа с часов до минут</p>
+                    </div>
+                    <div class="highlight-box">
+                        <h4>Объективность</h4>
+                        <p>Структурированный подход, минимизация ошибок</p>
+                    </div>
+                    <div class="highlight-box">
+                        <h4>Актуальность</h4>
+                        <p>Онлайн-поиск актуальной информации</p>
+                    </div>
+                    <div class="highlight-box">
+                        <h4>Масштабируемость</h4>
+                        <p>Обработка большого количества лотов</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Слайд 11: База данных -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2>10. База данных</h2>
+            </div>
+            <div class="slide-content">
+                <h3>Основные таблицы</h3>
+                <div class="two-column">
+                    <div>
+                        <h4>lots</h4>
+                        <ul>
+                            <li>Номер лота, платформа</li>
+                            <li>Название, описание</li>
+                            <li>Бюджет, дедлайн</li>
+                            <li>Заказчик, номенклатура</li>
+                            <li>URL</li>
+                            <li><strong>Документация:</strong> documentation_path, documentation_text, documentation_analyzed</li>
+                            <li><strong>Поддержка множественных файлов:</strong> PDF, DOCX, DOC, TXT, RTF, XLSX, XLS</li>
+                        </ul>
+                        
+                        <h4>suppliers</h4>
+                        <ul>
+                            <li>Название компании</li>
+                            <li>ИНН, сайт</li>
+                            <li>Город</li>
+                            <li>Рейтинг надежности</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4>commercial_proposals</h4>
+                        <ul>
+                            <li>Связь с лотом и поставщиком</li>
+                            <li>Цена товара</li>
+                            <li>Стоимость доставки</li>
+                            <li><strong>Рейтинг надежности поставщика</strong> (через LLM)</li>
+                            <li><strong>Информация о надежности</strong> (текст от LLM)</li>
+                            <li>Интегральный рейтинг</li>
+                            <li>Прочие условия</li>
+                            <li>Дата анализа</li>
+                        </ul>
+                        
+                        <h4>users & user_preferences</h4>
+                        <ul>
+                            <li>Telegram ID, роль</li>
+                            <li>Email для уведомлений</li>
+                            <li>Настройки фильтрации</li>
+                            <li>Заказчики, номенклатура</li>
+                            <li>Бюджетные ограничения</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="diagram-container">
+                    <div class="mermaid">
+erDiagram
+    USERS ||--o{ USER_PREFERENCES : has
+    LOTS ||--o{ COMMERCIAL_PROPOSALS : has
+    SUPPLIERS ||--o{ COMMERCIAL_PROPOSALS : provides
+    
+    USERS {
+        int id PK
+        int telegram_id UK
+        string username
+        string full_name
+        string role
+        string created_at
+    }
+    
+    USER_PREFERENCES {
+        int id PK
+        int user_id FK
+        string customers
+        string nomenclature
+        float budget_min
+        float budget_max
+        string email
+    }
+    
+    LOTS {
+        int id PK
+        string lot_number UK
+        string platform_name
+        string title
+        string description
+        float budget
+        string deadline
+        string customer
+        string nomenclature
+    }
+    
+    SUPPLIERS {
+        int id PK
+        string name
+        string inn
+        string website
+        string city
+        int reliability_rating
+    }
+    
+    COMMERCIAL_PROPOSALS {
+        int id PK
+        int lot_id FK
+        int supplier_id FK
+        float product_price
+        float delivery_cost
+        float integral_rating
+        string other_conditions
+    }
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Слайд 12: Развертывание -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2>11. Развертывание</h2>
+            </div>
+            <div class="slide-content">
+                <h3>Docker Compose архитектура</h3>
+                <div class="diagram-container">
+                    <div class="mermaid">
+graph TB
+    subgraph "Production Environment"
+        subgraph "Docker Container: Bot"
+            BOT_APP[bot/main.py<br/>Python Application]
+            BOT_DEPS[aiogram, apscheduler<br/>Dependencies]
+        end
+        
+        subgraph "Docker Container: Database"
+            POSTGRES[(PostgreSQL<br/>Database)]
+            ALEMBIC[Alembic<br/>Migrations]
+        end
+        
+        subgraph "External Services"
+            PERPLEXITY_API[Perplexity AI API<br/>https://api.perplexity.ai]
+            TG_API[Telegram Bot API<br/>https://api.telegram.org]
+            SMTP_SERVER[SMTP Server<br/>Email Service]
+        end
+        
+        subgraph "Configuration"
+            ENV_FILE[.env<br/>Environment Variables]
+            DOCKER_COMPOSE[docker-compose.yml<br/>Orchestration]
+        end
+    end
+    
+    subgraph "Scheduled Tasks"
+        PARSER_JOB[Parser Job<br/>Every N minutes]
+        CLEANUP_JOB[Cleanup Job<br/>Daily at 3:00 AM]
+    end
+    
+    ENV_FILE --> BOT_APP
+    DOCKER_COMPOSE --> BOT_APP
+    DOCKER_COMPOSE --> POSTGRES
+    
+    BOT_APP --> BOT_DEPS
+    BOT_APP --> POSTGRES
+    BOT_APP --> TG_API
+    BOT_APP --> PERPLEXITY_API
+    BOT_APP --> SMTP_SERVER
+    
+    ALEMBIC --> POSTGRES
+    
+    PARSER_JOB --> BOT_APP
+    CLEANUP_JOB --> BOT_APP
+    
+    style BOT_APP fill:#e1f5ff
+    style POSTGRES fill:#ffe1f5
+    style PERPLEXITY_API fill:#e1ffe1
+    style SMTP_SERVER fill:#e1ffe1
+    style TG_API fill:#e1ffe1
+                    </div>
+                </div>
+                
+                <h3>Требования к ресурсам</h3>
+                <div class="two-column">
+                    <div class="highlight-box">
+                        <h4>Минимальная конфигурация</h4>
+                        <ul>
+                            <li>CPU: 2 ядра</li>
+                            <li>RAM: 2 ГБ</li>
+                            <li>Диск: 20 ГБ SSD</li>
+                        </ul>
+                    </div>
+                    <div class="highlight-box">
+                        <h4>Рекомендуемая конфигурация</h4>
+                        <ul>
+                            <li>CPU: 4 ядра</li>
+                            <li>RAM: 4-8 ГБ</li>
+                            <li>Диск: 100 ГБ SSD</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="code-block">
+docker compose up -d
+                </div>
+            </div>
+        </div>
+        
+        <!-- Слайд 13: Перспективы развития -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2>12. Перспективы развития</h2>
+            </div>
+            <div class="slide-content">
+                <div class="two-column">
+                    <div>
+                        <h3>Кратковременные (1-2 месяца)</h3>
+                        <ul>
+                            <li>Улучшение качества промптов на основе обратной связи</li>
+                            <li>Расширение функциональности (анализ нескольких лотов одновременно)</li>
+                            <li>Оптимизация производительности (кэширование, параллельная обработка)</li>
+                        </ul>
+                        
+                        <h3>Среднесрочные (3-6 месяцев)</h3>
+                        <ul>
+                            <li>Интеграция с другими LLM (OpenAI GPT-4, YandexGPT)</li>
+                            <li>Машинное обучение для улучшения оценок на исторических данных</li>
+                            <li>Расширенная аналитика и отчетность</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3>Долгосрочные (6-12 месяцев)</h3>
+                        <ul>
+                            <li>Fine-tuning специализированной модели на данных закупок</li>
+                            <li>Мультимодальный анализ (изображения, чертежи)</li>
+                            <li>Прогнозирование результатов конкурсов</li>
+                            <li>Автоматизация полного цикла (от поиска до подачи заявки)</li>
+                        </ul>
+                        
+                        <div class="highlight-box" style="margin-top: 30px;">
+                            <h4>Roadmap развития</h4>
+                            <p>Система спроектирована с учетом масштабируемости и готовности к расширению функциональности.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Слайд 14: Заключение -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2>13. Заключение</h2>
+            </div>
+            <div class="slide-content" style="text-align: center;">
+                <div style="margin-top: 50px;">
+                    <h3 style="font-size: 2em; color: #667eea; margin-bottom: 30px;">Итоги проекта</h3>
+                    <div class="highlight-box" style="max-width: 800px; margin: 0 auto;">
+                        <p style="font-size: 1.3em; margin-bottom: 20px;">
+                            В рамках проекта успешно создан <strong>AI-ассистент для автоматизированного анализа закупок</strong>.
+                        </p>
+                        <p style="font-size: 1.2em; margin-bottom: 20px;">
+                            Реализованы все запланированные функции, система протестирована и <strong>готова к использованию</strong>.
+                        </p>
+                        <p style="font-size: 1.2em;">
+                            Нейро-сотрудник демонстрирует <strong>высокую эффективность</strong> в анализе закупок и принятии решений.
+                        </p>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 60px;">
+                    <h3 style="font-size: 1.8em; color: #764ba2; margin-bottom: 30px;">Спасибо за внимание!</h3>
+                    <p style="font-size: 1.3em; color: #666;">
+                        Готов ответить на ваши вопросы
+                    </p>
+                </div>
+                
+                <div style="margin-top: 40px;">
+                    <div class="badge badge-success" style="font-size: 1.1em; padding: 10px 20px;">MVP готов к продакшену</div>
+                    <div class="badge badge-info" style="font-size: 1.1em; padding: 10px 20px;">100% успешность</div>
+                    <div class="badge badge-warning" style="font-size: 1.1em; padding: 10px 20px;">10-25 сек анализ</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Навигация -->
+    <div class="navigation">
+        <button class="nav-button" id="prevBtn" onclick="changeSlide(-1)">← Назад</button>
+        <button class="nav-button" id="nextBtn" onclick="changeSlide(1)">Вперед →</button>
+    </div>
+    
+    <!-- Счетчик слайдов -->
+    <div class="slide-counter">
+        <span id="slideNum">1</span> / <span id="totalSlides">13</span>
+    </div>
+    
+    <script>
+        // Инициализация Mermaid
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            themeVariables: {
+                primaryColor: '#667eea',
+                primaryTextColor: '#fff',
+                primaryBorderColor: '#764ba2',
+                lineColor: '#667eea',
+                secondaryColor: '#f8f9fa',
+                tertiaryColor: '#e9ecef'
+            },
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            },
+            sequence: {
+                diagramMarginX: 50,
+                diagramMarginY: 10,
+                actorMargin: 50,
+                width: 150,
+                height: 65
+            },
+            er: {
+                fontSize: 14
+            }
+        });
+        
+        // Управление слайдами
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        
+        document.getElementById('totalSlides').textContent = totalSlides;
+        
+        function showSlide(n) {
+            // Циклическая навигация: с последнего слайда переходим на первый, с первого на последний
+            if (n >= totalSlides) {
+                currentSlide = 0;  // С последнего на первый
+            } else if (n < 0) {
+                currentSlide = totalSlides - 1;  // С первого на последний
+            } else {
+                currentSlide = n;
+            }
+            
+            slides.forEach(slide => slide.classList.remove('active'));
+            slides[currentSlide].classList.add('active');
+            
+            document.getElementById('slideNum').textContent = currentSlide + 1;
+            
+            // Кнопки всегда активны для циклической навигации
+            document.getElementById('prevBtn').disabled = false;
+            document.getElementById('nextBtn').disabled = false;
+        }
+        
+        function changeSlide(direction) {
+            // Циклическая навигация: с последнего слайда переходим на первый, с первого на последний
+            showSlide(currentSlide + direction);
+        }
+        
+        // Навигация клавиатурой (циклическая)
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                changeSlide(-1);  // Предыдущий слайд (с первого переходит на последний)
+            } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+                changeSlide(1);  // Следующий слайд (с последнего переходит на первый)
+            }
+        });
+        
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            // Даем время Mermaid для инициализации
+            setTimeout(() => {
+                showSlide(0);
+            }, 500);
+        });
+    </script>
+</body>
+</html>
