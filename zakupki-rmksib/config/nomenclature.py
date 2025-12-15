@@ -1,5 +1,6 @@
 """Справочник номенклатурных групп"""
-from typing import Dict, List
+from typing import Dict, List, Optional
+from loguru import logger
 
 # Специальная позиция "Все лоты" - означает парсинг всех лотов без фильтрации по номенклатуре
 ALL_LOTS_KEY = "Все лоты"
@@ -106,6 +107,7 @@ def get_nomenclature_keywords(nomenclature_name: str) -> List[str]:
 def check_nomenclature_match(lot_name: str, nomenclature_list: List[str]) -> bool:
     """
     Проверяет, соответствует ли название лота выбранным номенклатурным группам
+    Использует простое сопоставление по ключевым словам.
     
     Args:
         lot_name: Название лота
@@ -131,6 +133,173 @@ def check_nomenclature_match(lot_name: str, nomenclature_list: List[str]) -> boo
             continue
         if any(keyword in lot_name_lower for keyword in keywords):
             return True
+    
+    return False
+
+
+async def check_nomenclature_match_with_llm(
+    lot_title: str,
+    lot_nomenclature: Optional[List[str] | Dict] = None,
+    lot_description: Optional[str] = None,
+    nomenclature_list: List[str] = None
+) -> bool:
+    """
+    Проверяет соответствие номенклатуры лота выбранным номенклатурным группам
+    с использованием LLM для семантического сопоставления.
+    
+    Сначала пытается использовать простое сопоставление по ключевым словам.
+    Если простое сопоставление не дает результата, использует LLM для семантического анализа.
+    
+    Args:
+        lot_title: Название лота
+        lot_nomenclature: Номенклатура из лота (список строк или словарь)
+        lot_description: Описание лота (опционально, для более точного анализа)
+        nomenclature_list: Список выбранных номенклатурных групп из настроек
+    
+    Returns:
+        True если лот соответствует хотя бы одной номенклатурной группе
+    """
+    if not nomenclature_list:
+        return True
+    
+    # Если выбрана позиция "Все лоты", пропускаем все лоты без фильтрации
+    if ALL_LOTS_KEY in nomenclature_list:
+        return True
+    
+    # Сначала пробуем простое сопоставление по ключевым словам
+    simple_match = check_nomenclature_match(lot_title, nomenclature_list)
+    if simple_match:
+        logger.debug(f"Simple nomenclature match found for: {lot_title[:50]}")
+        return True
+    
+    # Если простое сопоставление не дало результата, используем LLM
+    try:
+        from services.ai.perplexity import ask_perplexity
+        
+        # Формируем текст для анализа
+        lot_text_parts = [lot_title]
+        if lot_description:
+            lot_text_parts.append(f"Описание: {lot_description[:500]}")  # Ограничиваем длину
+        
+        # Обрабатываем номенклатуру из лота
+        if lot_nomenclature:
+            if isinstance(lot_nomenclature, dict):
+                # Если это словарь, извлекаем значения
+                nom_items = []
+                for key, value in lot_nomenclature.items():
+                    if isinstance(value, list):
+                        nom_items.extend([str(v) for v in value])
+                    else:
+                        nom_items.append(str(value))
+                if nom_items:
+                    lot_text_parts.append(f"Номенклатура в лоте: {', '.join(nom_items[:10])}")
+            elif isinstance(lot_nomenclature, list):
+                nom_str = ', '.join([str(item) for item in lot_nomenclature[:10]])
+                if nom_str:
+                    lot_text_parts.append(f"Номенклатура в лоте: {nom_str}")
+        
+        lot_text = "\n".join(lot_text_parts)
+        
+        # Формируем список номенклатурных групп с их ключевыми словами для контекста
+        nomenclature_context = []
+        for nom_group in nomenclature_list:
+            keywords = get_nomenclature_keywords(nom_group)
+            if keywords:
+                nomenclature_context.append(f"- {nom_group}: {', '.join(keywords[:5])}")
+        
+        nomenclature_context_str = "\n".join(nomenclature_context)
+        
+        # Формируем промпт для LLM
+        system_prompt = """Ты эксперт по классификации товаров и номенклатуре в промышленных закупках.
+Твоя задача - определить, относится ли товар/услуга из лота к указанным номенклатурным группам.
+
+Отвечай ТОЛЬКО "ДА" или "НЕТ" без дополнительных пояснений."""
+        
+        user_prompt = f"""Определи, относится ли товар/услуга из следующего лота к одной из указанных номенклатурных групп:
+
+<ДАННЫЕ ЛОТА>
+{lot_text}
+</ДАННЫЕ ЛОТА>
+
+<НОМЕНКЛАТУРНЫЕ ГРУППЫ ИЗ НАСТРОЕК>
+{nomenclature_context_str}
+</НОМЕНКЛАТУРНЫЕ ГРУППЫ ИЗ НАСТРОЕК>
+
+<ИНСТРУКЦИЯ>
+Проанализируй семантически и логически:
+1. Определи, к какой категории относится товар/услуга из лота
+2. Проверь, входит ли эта категория в одну из указанных номенклатурных групп
+3. Учитывай, что названия могут отличаться, но товар может относиться к той же категории
+4. Например: "болты М12" относятся к "Метизы и крепёжные изделия", даже если в названии нет слова "метиз"
+
+Ответь ТОЛЬКО "ДА" если товар относится хотя бы к одной группе, или "НЕТ" если не относится ни к одной.
+</ИНСТРУКЦИЯ>"""
+        
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt}
+        ]
+        
+        # Вызываем LLM с коротким ответом
+        response = await ask_perplexity(messages, temperature=0.1, max_tokens=50)
+        
+        # Парсим ответ
+        response_upper = response.strip().upper()
+        if "ДА" in response_upper or "YES" in response_upper:
+            logger.info(f"LLM confirmed nomenclature match for: {lot_title[:50]}")
+            return True
+        else:
+            logger.debug(f"LLM rejected nomenclature match for: {lot_title[:50]}")
+            return False
+            
+    except Exception as e:
+        logger.error(f"Error in LLM nomenclature matching: {e}", exc_info=True)
+        # В случае ошибки возвращаем False (не пропускаем лот, если не уверены)
+        return False
+
+
+async def check_nomenclature_match_enhanced(
+    lot_title: str,
+    lot_nomenclature: Optional[List[str] | Dict] = None,
+    lot_description: Optional[str] = None,
+    nomenclature_list: List[str] = None,
+    use_llm: bool = True
+) -> bool:
+    """
+    Улучшенная проверка соответствия номенклатуры с возможностью использования LLM.
+    
+    Сначала пытается использовать простое сопоставление по ключевым словам.
+    Если простое сопоставление не дает результата и use_llm=True, использует LLM.
+    
+    Args:
+        lot_title: Название лота
+        lot_nomenclature: Номенклатура из лота (список строк или словарь)
+        lot_description: Описание лота (опционально)
+        nomenclature_list: Список выбранных номенклатурных групп из настроек
+        use_llm: Использовать ли LLM для семантического сопоставления при отсутствии точного совпадения
+    
+    Returns:
+        True если лот соответствует хотя бы одной номенклатурной группе
+    """
+    if not nomenclature_list:
+        return True
+    
+    if ALL_LOTS_KEY in nomenclature_list:
+        return True
+    
+    # Сначала пробуем простое сопоставление
+    simple_match = check_nomenclature_match(lot_title, nomenclature_list)
+    if simple_match:
+        return True
+    
+    # Если простое сопоставление не дало результата и разрешено использование LLM
+    if use_llm:
+        return await check_nomenclature_match_with_llm(
+            lot_title,
+            lot_nomenclature,
+            lot_description,
+            nomenclature_list
+        )
     
     return False
 

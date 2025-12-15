@@ -8,7 +8,7 @@ from utils.formatters import format_rub, format_date
 from config.settings import settings
 
 
-def _matches_preferences(
+async def _matches_preferences(
 	lot: Dict,
 	customers: List[str] | None,
 	nomenclature: List[str] | None,
@@ -24,9 +24,15 @@ def _matches_preferences(
 		cust_ok = (lot.get("customer") in customers)
 	
 	if nomenclature:
-		# Используем функцию проверки номенклатуры из config
-		from config.nomenclature import check_nomenclature_match
-		nom_ok = check_nomenclature_match(lot.get("title", ""), nomenclature)
+		# Используем улучшенную функцию проверки номенклатуры с поддержкой LLM
+		from config.nomenclature import check_nomenclature_match_enhanced
+		nom_ok = await check_nomenclature_match_enhanced(
+			lot_title=lot.get("title", ""),
+			lot_nomenclature=lot.get("nomenclature"),
+			lot_description=lot.get("description"),
+			nomenclature_list=nomenclature,
+			use_llm=True  # Используем LLM для семантического сопоставления
+		)
 	
 	# Проверка бюджета
 	if budget_min is not None or budget_max is not None:
@@ -132,17 +138,17 @@ async def run_parsers_once() -> int:
 				pref = await p_repo.get_or_create(user.id)
 				if not pref.notify_enabled:
 					continue
-				# Фильтруем с учетом бюджета
-				user_lots = [
-					d for d in created
-					if _matches_preferences(
+				# Фильтруем с учетом бюджета (асинхронная проверка)
+				user_lots = []
+				for d in created:
+					if await _matches_preferences(
 						d,
 						pref.customers,
 						pref.nomenclature,
 						pref.budget_min,
 						pref.budget_max
-					)
-				]
+					):
+						user_lots.append(d)
 				if user_lots:
 					personal[user.contact_email] = user_lots
 		# Fallback to global list if no matches for anyone
